@@ -519,6 +519,52 @@ body {
   60% { transform: translate(2px, -4px); }
   75% { transform: translate(-1px, 1px); }
 }
+
+/* ═══ v3 ═══ */
+.anatomy-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.anatomy-modal.show{opacity:1;pointer-events:auto}
+.anatomy-content{background:white;border-radius:24px;padding:2rem;max-width:480px;width:90%;max-height:85vh;overflow-y:auto;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative}
+.anatomy-content h3{font-family:'Bubblegum Sans',cursive;color:#FF6B9D;font-size:1.5rem;margin-bottom:.5rem}
+.close-btn{position:absolute;top:1rem;right:1rem;background:#fee2e2;border:none;border-radius:50%;width:36px;height:36px;font-size:1.2rem;cursor:pointer;z-index:10}
+.anatomy-tooth{position:relative;width:200px;height:280px;margin:1rem auto}
+.anatomy-layer{position:absolute;cursor:pointer;transition:all .3s;border-radius:12px;padding:4px}
+.anatomy-layer:hover,.anatomy-layer.active{transform:scale(1.08);box-shadow:0 0 20px rgba(255,107,157,.4)}
+.anatomy-info{background:#F8FAFC;border-radius:16px;padding:1rem;margin-top:1rem;text-align:left;min-height:80px}
+.anatomy-info h4{margin:0 0 .3rem;color:#FF6B9D}
+.anatomy-info p{margin:0 0 .3rem;font-size:.9rem}
+.layer-fact{background:#FEF3C7;padding:4px 10px;border-radius:20px;font-size:.8rem;display:inline-block;margin-top:4px}
+.anatomy-btn{background:linear-gradient(135deg,#E0E7FF,#C7D2FE);border:2px solid #818CF8;color:#4338CA;padding:8px 18px;border-radius:20px;font-size:.9rem;cursor:pointer;font-weight:700;margin-top:1rem;transition:all .3s}
+.anatomy-btn:hover{transform:scale(1.05);box-shadow:0 4px 15px rgba(99,102,241,.3)}
+.cavity-timeline{background:linear-gradient(135deg,#FFF1F2,#FEF3C7);border-radius:16px;padding:1.2rem;margin-top:1rem;border:2px solid #FECDD3}
+.timeline-display{text-align:center;margin-bottom:.8rem}
+.timeline-tooth{font-size:3rem;transition:all .3s}
+.timeline-day{font-family:'Bubblegum Sans',cursive;font-size:1.1rem;color:#6B21A8;font-weight:700}
+.timeline-desc{font-size:.85rem;color:#6B7280;margin-top:.3rem;min-height:2.5em}
+.timeline-slider{width:100%;margin:1rem 0;accent-color:#A78BFA}
+.badge-toggle{position:fixed;top:4.5rem;right:1rem;z-index:1500;background:linear-gradient(135deg,#FDE68A,#F59E0B);border:none;border-radius:20px;padding:6px 14px;font-size:.85rem;cursor:pointer;box-shadow:0 4px 15px rgba(245,158,11,.3);font-weight:700;transition:all .3s}
+.badge-toggle:hover{transform:scale(1.08)}
+.badge-panel{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.badge-panel.show{opacity:1;pointer-events:auto}
+.badge-panel-content{background:white;border-radius:24px;padding:2rem;max-width:420px;width:90%;max-height:85vh;overflow-y:auto;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative}
+.badge-panel-content h3{font-family:'Bubblegum Sans',cursive;color:#F59E0B;font-size:1.5rem}
+.badge-progress{color:#9CA3AF;font-size:.85rem;margin-bottom:1rem}
+.badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.badge-item{background:#F9FAFB;border-radius:16px;padding:12px 8px;text-align:center;opacity:.4;transition:all .4s}
+.badge-item.earned{opacity:1;background:linear-gradient(135deg,#FEF9C3,#FDE68A);box-shadow:0 4px 15px rgba(245,158,11,.2)}
+.badge-icon{font-size:2rem;margin-bottom:4px}
+.badge-name{font-size:.75rem;font-weight:700;color:#374151}
+.game-canvas-wrap{position:relative;width:340px;height:340px;margin:0 auto;border-radius:20px;overflow:hidden;background:#FFF8F0;border:3px solid #FFE66D}
+.game-canvas-wrap canvas{display:block;cursor:none}
+.brush-cursor{position:absolute;width:40px;height:40px;font-size:2rem;pointer-events:none;display:none;transform:translate(-50%,-50%);z-index:10;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+.brush-progress{width:100%;height:8px;background:#E5E7EB;border-radius:4px;margin-top:8px;overflow:hidden}
+.brush-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#4ECDC4,#06B6D4);border-radius:4px;transition:width .3s}
+.brush-zones{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.brush-zones .step{background:#FEF3C7;border:2px solid #FFD166;border-radius:10px;padding:2px 10px;font-size:.75rem;font-weight:700;color:#92400E;transition:all .3s}
+.brush-zones .step.done{background:#D1FAE5;border-color:#34D399;color:#065F46}
+.brush-zones .step.current{background:#FFF;color:#4F46E5;border-color:#818CF8}
+.brush-instruction{font-size:.85rem;color:#6B7280;margin-top:6px;font-weight:600}
+.timer-circle.warning #timerDisplay{color:#EF4444;animation:pulse .5s infinite}
+
 </style>
 </head>
 <body>
@@ -527,7 +573,8 @@ body {
 <div class="particles" id="particles"></div>
 
 <!-- ═══════ SOUND TOGGLE ═══════ -->
-<button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Toggle Suara">🔊</button>
+<button   <button class="badge-toggle" onclick="openBadges()">🏆 <span id="badgeCount">0</span></button>
+  class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Toggle Suara">🔊</button>
 
 <!-- ═══════ STAR RATING BAR ═══════ -->
 <div class="stars-bar" id="starsBar">
@@ -607,6 +654,8 @@ body {
     <p>"Mwahahaha! Riko tidak gosok gigi! Kami akan membuat <strong>lubang</strong>!" 😈</p>
   </div>
   <button class="brush-btn reveal" onclick="showCavity()" id="cavityBtn">Tunjukkan Apa yang Terjadi! 👀</button>
+
+  <div class="cavity-timeline reveal"><div class="timeline-display"><div class="timeline-tooth" id="timelineTooth">🦷</div><div class="timeline-day" id="timelineDay">Hari 0</div><div class="timeline-desc" id="timelineDesc">Gigi bersih dan sehat! 😊</div></div><input type="range" class="timeline-slider" id="cavitySlider" min="0" max="30" value="0" oninput="updateTimeline(this.value)"><p style="font-size:.75rem;color:#9CA3AF;text-align:center">Geser untuk lihat efek tidak gosok gigi! 👀</p></div>
 </section>
 
 <!-- ═══════ SCENE 4: LUBANG GIGI ═══════ -->
@@ -644,9 +693,40 @@ body {
     <div class="tip-card"><div class="tip-icon">🪥</div><h3>Gosok 2x Sehari</h3><p>Pagi setelah sarapan & malam sebelum tidur</p></div>
     <div class="tip-card"><div class="tip-icon">⏱️</div><h3>2 Menit Setiap Kali</h3><p>Seluruh permukaan gigi harus dibersihkan</p></div>
     <div class="tip-card"><div class="tip-icon">🍬</div><h3>Kurangi Gula</h3><p>Kurangi permen & minuman manis</p></div>
+  <button class="anatomy-btn" onclick="openAnatomy()">🔍 Kenali Struktur Gigi!</button>
+
   </div>
 </section>
 
+<!-- v3: Anatomy Modal -->
+<div class="anatomy-modal" id="anatomyModal">
+  <div class="anatomy-content">
+    <button class="close-btn" onclick="closeAnatomy()">✕</button>
+    <h3>🔬 Kenali Struktur Gigi!</h3>
+    <div class="anatomy-tooth">
+      <div class="anatomy-layer" data-layer="gum" onclick="showLayerInfo('gum')" style="position:absolute;top:0;left:0;right:0;height:70px;background:linear-gradient(180deg,#FFB4C2,#FF8CAB);border-radius:20px 20px 0 0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-size:.75rem;font-weight:700;color:#831843">GUSI</div>
+      <div class="anatomy-layer" data-layer="enamel" onclick="showLayerInfo('enamel')" style="position:absolute;top:60px;left:40px;right:40px;bottom:60px;background:linear-gradient(135deg,#FFF,#E0F2FE);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#0369A1">EMAIL</div>
+      <div class="anatomy-layer" data-layer="dentin" onclick="showLayerInfo('dentin')" style="position:absolute;top:100px;left:60px;right:60px;bottom:90px;background:#FEF3C7;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#92400E">DENTIN</div>
+      <div class="anatomy-layer" data-layer="pulp" onclick="showLayerInfo('pulp')" style="position:absolute;top:150px;left:80px;right:80px;bottom:110px;background:#FEE2E2;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#991B1B">SARAF</div>
+      <div class="anatomy-layer" data-layer="root" onclick="showLayerInfo('root')" style="position:absolute;bottom:0;left:30px;right:30px;height:60px;background:linear-gradient(180deg,#FDE68A,#FCD34D);border-radius:0 0 20px 20px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#78350F">AKAR</div>
+    </div>
+    <div class="anatomy-info" id="anatomyInfo">
+      <h4>Klik bagian gigi! 👆</h4>
+      <p>Pelajari email, dentin, saraf, gusi, dan akar gigi.</p>
+      <span class="layer-fact">💡 Gigi punya 5 lapisan!</span>
+    </div>
+    <button class="anatomy-btn" onclick="closeAnatomy()">Tutup ✅</button>
+  </div>
+</div>
+<!-- v3: Badge Panel -->
+<div class="badge-panel" id="badgePanel">
+  <div class="badge-panel-content">
+    <button class="close-btn" onclick="closeBadges()">✕</button>
+    <h3>🏆 Koleksi Piala!</h3>
+    <p class="badge-progress" id="badgeProgress">0/10 piala terkumpul</p>
+    <div class="badges-grid" id="badgesGrid"></div>
+  </div>
+</div>
 <!-- ═══════ SCENE 6: TIM PAHLAWAN GIGI ═══════ -->
 <section class="scene scene-team" id="scene6" data-scene="6">
   <span class="scene-number">🦸 Bab 6</span>
@@ -705,58 +785,26 @@ body {
   <button class="brush-btn" id="teamVictoryBtn" style="display:none;" onclick="playSound('victory');scrollToScene(7)">Lanjut ke Sikat Gigi! 🪥</button>
 </section>
 
-<!-- ═══════ SCENE 7: MINI GAME SIKAT GIGI ═══════ -->
+<!-- v3: Canvas Brush Game -->
 <section class="scene scene-game" id="scene7" data-scene="7">
   <span class="scene-number">🎮 Mini Game</span>
   <h2>🪥 Yuk Gosok Gigi!</h2>
-  <p>Klik area gigi untuk membersihkannya! Bersihkan semua dalam 30 detik!</p>
-
-  <div class="brush-timer-game">
-    <div style="position:relative;width:200px;height:200px;margin:0 auto;" id="brushGameArea">
-      <div class="tooth-main" style="width:120px;height:130px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 8px 25px rgba(0,0,0,0.1);" id="gameTooth">
-        <div class="tooth-root"></div><div class="tooth-root" style="left:auto;right:15px;"></div>
-        <div class="tooth-eyes"><div class="tooth-eye"></div><div class="tooth-eye"></div></div>
-        <div class="tooth-smile"></div>
-      </div>
-      <div id="floatingGerms" style="position:absolute;inset:0;transition:opacity 1s;">
-        <span class="mini-germ" style="position:absolute;top:8%;left:5%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;">🦠</span>
-        <span class="mini-germ" style="position:absolute;top:15%;right:8%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;animation-delay:0.5s;">👾</span>
-        <span class="mini-germ" style="position:absolute;bottom:22%;left:12%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;animation-delay:1s;">👹</span>
-        <span class="mini-germ" style="position:absolute;top:3%;right:20%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;animation-delay:1.5s;">🦠</span>
-        <span class="mini-germ" style="position:absolute;bottom:8%;right:5%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;animation-delay:0.8s;">👾</span>
-      </div>
-      <div id="cleanSparkles" style="position:absolute;inset:0;opacity:0;transition:opacity 1s;">
-        <span style="position:absolute;top:5%;left:10%;font-size:1.2rem;">✨</span>
-        <span style="position:absolute;top:15%;right:5%;font-size:1.2rem;">⭐</span>
-        <span style="position:absolute;bottom:25%;left:5%;font-size:1.2rem;">✨</span>
-        <span style="position:absolute;bottom:15%;right:10%;font-size:1.2rem;">💫</span>
-        <span style="position:absolute;top:40%;left:0;font-size:1.2rem;">⭐</span>
-      </div>
+  <p>Geser sikat ke semua area gigi sebelum waktu habis!</p>
+  <div class="brush-game">
+    <div class="game-canvas-wrap">
+      <canvas id="brushCanvas" width="340" height="340"></canvas>
+      <div class="brush-cursor" id="brushCursor">🪥</div>
     </div>
-
-    
-
-    <div class="timer-circle" id="timerCircle">
-      <span class="time" id="timerDisplay">30</span>
+    <div class="brush-zones" id="brushSteps">
+      <span class="step current">1.Atas</span><span class="step">2.Kanan</span><span class="step">3.Kiri</span><span class="step">4.Depan</span><span class="step">5.Belakang</span>
     </div>
-
-    <div class="steps" id="brushSteps">
-      <div class="step current" data-zone="0">1</div>
-      <div class="step" data-zone="1">2</div>
-      <div class="step" data-zone="2">3</div>
-      <div class="step" data-zone="3">4</div>
-      <div class="step" data-zone="4">5</div>
-    </div>
-
-    <div class="progress-container" style="margin:1rem auto;">
-      <div class="progress-bar" id="brushProgress" style="width:0%"></div>
-    </div>
-
-    <p id="brushInstruction" style="font-weight:700;color:var(--purple);min-height:1.5em;">Tekan tombol untuk mulai! 🪥</p>
-    <button class="brush-btn" id="brushStartBtn" onclick="startBrushGame()">Mulai Gosok! 🪥</button>
-    <div id="brushZones" style="display:none;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;"></div>
+    <div class="brush-progress"><div class="brush-progress-fill" id="brushProgress"></div></div>
+    <p class="brush-instruction" id="brushInstruction">Tekan tombol untuk mulai!</p>
+    <button class="mini-btn" id="brushStartBtn" onclick="startBrushGame()">Mulai Gosok! 🪥</button>
   </div>
 </section>
+
+
 
 <!-- ═══════ SCENE 8: KUIS ═══════ -->
 <section class="scene" id="scene8" data-scene="8" style="background:linear-gradient(180deg,#F0F9FF,#E0F2FE);">
@@ -1336,6 +1384,247 @@ document.addEventListener('keydown', e => {
   if (e.key==='ArrowDown'||e.key==='j') { e.preventDefault(); scrollToScene(Math.min(currentScene+1, scenes.length-1)); }
   else if (e.key==='ArrowUp'||e.key==='k') { e.preventDefault(); scrollToScene(Math.max(currentScene-1, 0)); }
 });
+</script>
+<script>
+// ═══ v3 ADDITIONS ═══
+// Loaded as separate script to avoid HTML parser </ issues
+
+// ── ANATOMY ──
+var LAYER_INFO = {
+  enamel: { title: '🦷 Email (Enamel)', desc: 'Lapisan terluar gigi. <b>Bahan terkeras di tubuh manusia!</b> Melindungi dari panas, dingin, gula. Kalau rusak, tidak bisa tumbuh sendiri.', fact: '💡 Setebal 2-3mm, warna putih kebiruan' },
+  dentin: { title: '🟡 Dentin', desc: 'Di bawah email, berwarna kuning, <b>penuh saluran kecil ke saraf</b>. Email rusak, panas/dingin masuk, gigi ngilu!', fact: '💡 90% gigi terdiri dari dentin' },
+  pulp: { title: '❤️ Saraf Gigi', desc: 'Di tengah gigi ada <b>jaringan hidup penuh saraf</b>. Kalau bakteri masuk ke sini, <b>SAKITNYA LUAR BIASA!</b>', fact: '💡 Memberi nutrisi agar gigi tetap hidup' },
+  gum: { title: '💗 Gusi', desc: 'Menahan gigi tetap di tempat. Sehat = merah muda. Merah bengkak + berdarah = <b>radang gusi!</b>', fact: '💡 Menutupi leher gigi rapat-rapat' },
+  root: { title: '🦴 Akar Gigi', desc: 'Di bawah gusi, <b>tertanam kuat di tulang rahang</b>. Gigi depan 1 akar, geraham 2-3 akar.', fact: '💡 Lebih panjang dari mahkota gigi' }
+};
+
+function openAnatomy() { playSound('click'); document.getElementById('anatomyModal').classList.add('show'); }
+function closeAnatomy() { playSound('click'); document.getElementById('anatomyModal').classList.remove('show'); }
+function showLayerInfo(layer) {
+  playSound('click');
+  var info = LAYER_INFO[layer];
+  if (!info) return;
+  document.querySelectorAll('.anatomy-layer').forEach(function(l) { l.classList.remove('active'); });
+  var el = document.querySelector('.anatomy-layer[data-layer="' + layer + '"]');
+  if (el) el.classList.add('active');
+  var p = document.getElementById('anatomyInfo');
+  p.innerHTML = '<h4>' + info.title + '</h4><p>' + info.desc + '</p><span class="layer-fact">' + info.fact + '</span>';
+  p.style.background = '#F0F9FF';
+  setTimeout(function() { p.style.background = '#F8FAFC'; }, 1500);
+  earnBadge('anatomy');
+}
+
+// ── CAVITY TIMELINE ──
+var TIMELINE_DATA = [
+  { day: 0, emoji: '🦷', desc: 'Gigi bersih dan sehat! 😊', color: '#34D399' },
+  { day: 1, emoji: '🦷', desc: 'Sisa makanan mulai menempel. 🦠', color: '#34D399' },
+  { day: 3, emoji: '🦷', desc: 'Plak mulai terbentuk! 😬', color: '#FFE66D' },
+  { day: 7, emoji: '😬', desc: 'Gigi ngilu saat makan manis! 😟', color: '#FF8C42' },
+  { day: 14, emoji: '😣', desc: 'Lubang kecil mulai terbentuk! 😖', color: '#F87171' },
+  { day: 21, emoji: '😭', desc: 'Lubang membesar! Harus ke dokter! 🏥', color: '#F87171' },
+  { day: 30, emoji: '💀', desc: 'Lubang besar! Saraf terpapar! 😱', color: '#DC2626' }
+];
+
+function updateTimeline(val) {
+  val = parseInt(val);
+  var closest = TIMELINE_DATA[0];
+  for (var i = 0; i < TIMELINE_DATA.length; i++) {
+    if (val >= TIMELINE_DATA[i].day) closest = TIMELINE_DATA[i];
+  }
+  document.getElementById('timelineDay').textContent = 'Hari ' + val;
+  document.getElementById('timelineDay').style.color = closest.color;
+  document.getElementById('timelineTooth').textContent = closest.emoji;
+  document.getElementById('timelineDesc').innerHTML = closest.desc;
+}
+
+// ── BADGE SYSTEM ──
+var BADGES = [
+  { id: 'start', icon: '🚀', name: 'Petualang' },
+  { id: 'cavity', icon: '😨', name: 'Korban Kuman' },
+  { id: 'dentist', icon: '🏥', name: 'Berani ke Dokter' },
+  { id: 'anatomy', icon: '🔍', name: 'Ahli Anatom' },
+  { id: 'boss', icon: '⚔️', name: 'Pembunuh Cavitarus' },
+  { id: 'brush5', icon: '🪥', name: 'Sikat Sempurna' },
+  { id: 'quiz4', icon: '🧠', name: 'Cerdas Gigi' },
+  { id: 'quiz5', icon: '🏆', name: 'Master Gigi' },
+  { id: 'complete', icon: '🌟', name: 'Selesai!' },
+  { id: 'sound', icon: '🔊', name: 'DJ Gigiku' }
+];
+
+var earnedBadges = [];
+try { earnedBadges = JSON.parse(localStorage.getItem('dentalBadges') || '[]'); } catch(e) { earnedBadges = []; }
+
+function earnBadge(id) {
+  if (earnedBadges.indexOf(id) >= 0) return;
+  earnedBadges.push(id);
+  try { localStorage.setItem('dentalBadges', JSON.stringify(earnedBadges)); } catch(e) {}
+  updateBadgeUI();
+  playSound('victory');
+  var b = null;
+  for (var i = 0; i < BADGES.length; i++) { if (BADGES[i].id === id) { b = BADGES[i]; break; } }
+  if (b) showToast(b.icon + ' Piala: ' + b.name + '!');
+}
+
+function updateBadgeUI() {
+  var cnt = document.getElementById('badgeCount');
+  var prog = document.getElementById('badgeProgress');
+  var grid = document.getElementById('badgesGrid');
+  if (cnt) cnt.textContent = earnedBadges.length;
+  if (prog) prog.textContent = earnedBadges.length + '/10 piala terkumpul';
+  if (!grid) return;
+  grid.innerHTML = '';
+  for (var i = 0; i < BADGES.length; i++) {
+    var b = BADGES[i];
+    var earned = earnedBadges.indexOf(b.id) >= 0;
+    var d = document.createElement('div');
+    d.className = 'badge-item' + (earned ? ' earned' : '');
+    d.innerHTML = '<div class="badge-icon">' + b.icon + '</div><div class="badge-name">' + b.name + '</div>';
+    grid.appendChild(d);
+  }
+}
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:4rem;left:50%;transform:translateX(-50%);background:white;padding:0.8rem 1.5rem;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.15);z-index:3000;font-weight:700;font-size:1rem;animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);white-space:nowrap;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.style.transition = 'all 0.3s'; t.style.opacity = '0'; }, 2500);
+  setTimeout(function() { t.remove(); }, 3000);
+}
+
+function openBadges() { playSound('click'); updateBadgeUI(); document.getElementById('badgePanel').classList.add('show'); }
+function closeBadges() { playSound('click'); document.getElementById('badgePanel').classList.remove('show'); }
+updateBadgeUI();
+
+// ── CANVAS DRAG-TO-BRUSH GAME ──
+var CG = { started: false, done: false, timeLeft: 30, timer: null, zones: [false,false,false,false,false], ctx: null, canvas: null, isDrawing: false, lastX: 0, lastY: 0 };
+
+function drawToothScene(ctx, w, h) {
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#FFF8F0'; ctx.fillRect(0, 0, w, h);
+  var cx = w/2, cy = h/2, tw = 120, th = 150;
+  // Roots
+  ctx.fillStyle = '#FEF3C7';
+  ctx.beginPath(); ctx.ellipse(cx-30, cy+th/2+15, 18, 35, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+30, cy+th/2+15, 18, 35, 0, 0, Math.PI*2); ctx.fill();
+  // Body
+  ctx.fillStyle = '#F8FAFC'; ctx.shadowColor = 'rgba(0,0,0,0.1)'; ctx.shadowBlur = 15; ctx.shadowOffsetY = 5;
+  ctx.beginPath();
+  ctx.moveTo(cx-tw/2, cy-th/2+15);
+  ctx.quadraticCurveTo(cx-tw/2-5, cy-th/2, cx-tw/2+15, cy-th/2);
+  ctx.lineTo(cx+tw/2-15, cy-th/2);
+  ctx.quadraticCurveTo(cx+tw/2+5, cy-th/2, cx+tw/2, cy-th/2+15);
+  ctx.lineTo(cx+tw/2, cy+th/2-10);
+  ctx.quadraticCurveTo(cx+tw/2, cy+th/2, cx+tw/2-15, cy+th/2);
+  ctx.lineTo(cx-tw/2+15, cy+th/2);
+  ctx.quadraticCurveTo(cx-tw/2, cy+th/2, cx-tw/2, cy+th/2-10);
+  ctx.closePath(); ctx.fill(); ctx.shadowColor = 'transparent';
+  // Eyes
+  ctx.fillStyle = '#475569';
+  ctx.beginPath(); ctx.arc(cx-22, cy-25, 6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+22, cy-25, 6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.arc(cx-20, cy-27, 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+24, cy-27, 2.5, 0, Math.PI*2); ctx.fill();
+  // Smile
+  ctx.strokeStyle = '#CBD5E1'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, 18, 0.1*Math.PI, 0.9*Math.PI); ctx.stroke();
+  // Zone circles
+  var labels = ['Atas','Kanan','Kiri','Depan','Belakang'];
+  var zx = [cx, cx+tw/2+30, cx-tw/2-30, cx, cx];
+  var zy = [cy-th/2-20, cy-15, cy-15, cy+10, cy+th/2+55];
+  for (var i = 0; i < 5; i++) {
+    ctx.fillStyle = CG.zones[i] ? 'rgba(78,205,196,0.2)' : 'rgba(255,230,109,0.3)';
+    ctx.strokeStyle = CG.zones[i] ? '#4ECDC4' : '#FFD166';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(zx[i], zy[i], 25, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = CG.zones[i] ? '#059669' : '#92400E';
+    ctx.font = 'bold 10px Nunito'; ctx.textAlign = 'center';
+    ctx.fillText(labels[i], zx[i], zy[i]+4);
+  }
+  if (!CG.started) {
+    ctx.fillStyle = '#A78BFA'; ctx.font = 'bold 13px Nunito'; ctx.textAlign = 'center';
+    ctx.fillText('Tekan Mulai Gosok lalu gerakkan', cx, h-20);
+    ctx.fillText('mouse/finger di area kuning!', cx, h-5);
+  }
+}
+
+function initCanvasGame() {
+  var c = document.getElementById('brushCanvas');
+  if (!c) return;
+  c.width = 340; c.height = 340;
+  CG.ctx = c.getContext('2d'); CG.canvas = c;
+  drawToothScene(CG.ctx, 340, 340);
+  var gp = function(e) {
+    var r = c.getBoundingClientRect();
+    var cx = e.touches ? e.touches[0].clientX : e.clientX;
+    var cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (cx-r.left)*c.width/r.width, y: (cy-r.top)*c.height/r.height };
+  };
+  c.addEventListener('mousedown', function(e) { if(!CG.started||CG.done)return; CG.isDrawing=true; var p=gp(e); CG.lastX=p.x; CG.lastY=p.y; });
+  c.addEventListener('mousemove', function(e) { if(!CG.isDrawing||CG.done)return; var p=gp(e); cleanZone(CG.lastX,CG.lastY,p.x,p.y); CG.lastX=p.x; CG.lastY=p.y; var cur=document.getElementById('brushCursor'); if(cur){var r=c.getBoundingClientRect(); cur.style.left=(e.clientX-r.left)+'px'; cur.style.top=(e.clientY-r.top)+'px';} });
+  c.addEventListener('mouseup', function() { CG.isDrawing=false; });
+  c.addEventListener('mouseleave', function() { CG.isDrawing=false; });
+  c.addEventListener('touchstart', function(e) { if(!CG.started||CG.done)return; e.preventDefault(); CG.isDrawing=true; var p=gp(e); CG.lastX=p.x; CG.lastY=p.y; }, {passive:false});
+  c.addEventListener('touchmove', function(e) { if(!CG.isDrawing||CG.done)return; e.preventDefault(); var p=gp(e); cleanZone(CG.lastX,CG.lastY,p.x,p.y); CG.lastX=p.x; CG.lastY=p.y; }, {passive:false});
+  c.addEventListener('touchend', function() { CG.isDrawing=false; });
+}
+
+function cleanZone(x1,y1,x2,y2) {
+  var cx=170,cy=170,tw=120,th=150;
+  var zx=[cx,cx+tw/2+30,cx-tw/2-30,cx,cx];
+  var zy=[cy-th/2-20,cy-15,cy-15,cy+10,cy+th/2+55];
+  for (var s=0;s<=5;s++) {
+    var px=x1+(x2-x1)*s/5, py=y1+(y2-y1)*s/5;
+    for (var i=0;i<5;i++) {
+      if(CG.zones[i])continue;
+      var dx=px-zx[i],dy=py-zy[i];
+      if(Math.sqrt(dx*dx+dy*dy)<40){CG.zones[i]=true;playSound('brush');}
+    }
+  }
+  drawToothScene(CG.ctx,340,340);
+  var next=-1; for(var i=0;i<5;i++){if(!CG.zones[i]){next=i;break;}}
+  var labels=['Atas','Kanan','Kiri','Depan','Belakang'];
+  document.getElementById('brushInstruction').textContent=next>=0?'Gosok area '+labels[next]+'! 🪥':'🎉 Semua bersih!';
+  document.getElementById('brushProgress').style.width=(CG.zones.filter(function(z){return z}).length/5*100)+'%';
+  var steps=document.querySelectorAll('#brushSteps .step');
+  for(var i=0;i<steps.length;i++){steps[i].className='step';if(CG.zones[i])steps[i].className='step done';else{var allPrev=true;for(var j=0;j<i;j++){if(!CG.zones[j])allPrev=false;}if(allPrev)steps[i].className='step current';}}
+  if(CG.zones.every(function(z){return z})){CG.done=true;clearInterval(CG.timer);endBrushGame(true);}
+}
+
+function startBrushGame() {
+  if(CG.started||CG.done)return;
+  CG.started=true; CG.timeLeft=30; CG.zones=[false,false,false,false,false];
+  playSound('click');
+  var c=document.getElementById('brushCanvas');
+  if(c){c.width=340;c.height=340;CG.ctx=c.getContext('2d');drawToothScene(CG.ctx,340,340);}
+  document.getElementById('brushStartBtn').style.display='none';
+  document.getElementById('brushCursor').style.display='block';
+  document.getElementById('timerCircle').classList.add('active');
+  document.getElementById('brushInstruction').textContent='Gosok area Atas! 🪥';
+  CG.timer=setInterval(function(){CG.timeLeft--;document.getElementById('timerDisplay').textContent=CG.timeLeft;if(CG.timeLeft<=10)document.getElementById('timerCircle').classList.add('warning');if(CG.timeLeft<=0){clearInterval(CG.timer);endBrushGame(false);}},1000);
+}
+
+function endBrushGame(won) {
+  CG.done=true;
+  document.getElementById('timerCircle').classList.remove('active','warning');
+  document.getElementById('brushCursor').style.display='none';
+  var cleaned=CG.zones.filter(function(z){return z}).length;
+  if(won){document.getElementById('brushInstruction').textContent='🎉 Semua gigi bersih!';playSound('victory');createConfetti();showReward('🏆','Gigi Bersih Sempurna!','Kamu sikat gigi dengan gerakan nyata! 🛡️');earnBadge('brush5');}
+  else{document.getElementById('brushInstruction').textContent=(cleaned>=3?'✨ ':'💪 ')+cleaned+'/5 area';showReward(cleaned>=3?'⭐':'💪',cleaned>=3?'Hampir Sempurna!':'Semangat!',cleaned+'/5 area dibersihkan.');}
+  setTimeout(function(){CG.started=false;CG.done=false;CG.zones=[false,false,false,false,false];CG.timeLeft=30;document.getElementById('brushStartBtn').style.display='';document.getElementById('brushStartBtn').textContent='Mulai Gosok! 🪥';document.getElementById('timerDisplay').textContent='30';document.getElementById('timerCircle').classList.remove('active','warning');document.getElementById('brushProgress').style.width='0%';var steps=document.querySelectorAll('#brushSteps .step');for(var i=0;i<steps.length;i++){steps[i].className='step';if(i===0)steps[i].className='step current';}},3000);
+}
+
+// ── BADGE TRIGGERS ──
+var _es = earnStar;
+window.earnStar = function(i) { _es(i); if(i===1)earnBadge('start'); if(i===4)earnBadge('cavity'); if(i===5)earnBadge('dentist'); if(i===9)earnBadge('complete'); };
+var _ah = activateHero;
+window.activateHero = function(k) { _ah(k); if(bossDefeated)earnBadge('boss'); };
+var _aq = answerQuiz;
+window.answerQuiz = function(qi,oi) { _aq(qi,oi); if(quizCorrect>=4)earnBadge('quiz4'); if(quizCorrect>=5)earnBadge('quiz5'); };
+
+setTimeout(function() { initCanvasGame(); }, 500);
+
 </script>
 </body>
 </html>
