@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦷 Petualangan Gigi Sehat v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --pink: #FF6B9D; --mint: #4ECDC4; --yellow: #FFE66D;
+  --purple: #A78BFA; --orange: #FF8C42; --blue: #60A5FA;
+  --green: #34D399; --red: #F87171; --dark: #1E293B;
+  --white: #FFFFFF; --bg-light: #FFF8F0;
+  --tooth-white: #F8FAFC; --cavity-brown: #92400E;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg-light);
+  color: var(--dark);
+  overflow-x: hidden;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='28' font-size='28'%3E🦷%3C/text%3E%3C/svg%3E") 16 16, auto;
+}
+
+/* ═══════ PARTICLE SYSTEM ═══════ */
+.particles {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  opacity: 0.15;
+  animation: particleFall linear infinite;
+  font-size: clamp(12px, 2vw, 24px);
+}
+
+@keyframes particleFall {
+  0% { transform: translateY(-5vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.15; }
+  90% { opacity: 0.15; }
+  100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+}
+
+/* ═══════ SOUND TOGGLE ═══════ */
+.sound-toggle {
+  position: fixed; top: 1rem; right: 1rem; z-index: 200;
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  border: none; border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+}
+.sound-toggle:hover { transform: scale(1.1); }
+.sound-toggle.muted { opacity: 0.5; }
+
+/* ═══════ STAR RATING ═══════ */
+.stars-bar {
+  position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+  z-index: 200;
+  display: flex; gap: 0.3rem;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  padding: 0.4rem 1rem;
+  border-radius: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  font-size: 1rem;
+  align-items: center;
+}
+.stars-bar .star { transition: all 0.5s; filter: grayscale(1) opacity(0.3); }
+.stars-bar .star.earned { filter: grayscale(0) opacity(1); animation: starPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275); }
+.stars-bar .count { font-weight: 800; color: var(--purple); margin-left: 0.3rem; }
+
+@keyframes starPop {
+  0% { transform: scale(0) rotate(-30deg); }
+  50% { transform: scale(1.5) rotate(10deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* ═══════ SCROLLBAR ═══════ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #F1F5F9; }
+::-webkit-scrollbar-thumb { background: linear-gradient(var(--pink), var(--purple)); border-radius: 4px; }
+
+/* ═══════ HERO ═══════ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #E0F2FE 0%, #F0F9FF 30%, #FFF1F2 70%, #FDF2F8 100%);
+  scroll-snap-align: start; position: relative; overflow: hidden; padding: 2rem;
+}
+
+.hero-bg-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(60px);
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.hero-bg-orb:nth-child(1) { width:400px;height:400px;background:rgba(78,205,196,0.12);top:-10%;left:-10%; }
+.hero-bg-orb:nth-child(2) { width:300px;height:300px;background:rgba(255,107,157,0.12);bottom:-5%;right:-5%;animation-delay:3s; }
+.hero-bg-orb:nth-child(3) { width:250px;height:250px;background:rgba(167,139,250,0.1);top:40%;left:60%;animation-delay:5s; }
+
+@keyframes orbFloat {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(30px,-20px) scale(1.1); }
+}
+
+.giant-tooth {
+  font-size: clamp(80px, 15vw, 160px);
+  animation: toothBounce 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));
+  z-index: 1; position: relative;
+}
+
+@keyframes toothBounce {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-15px) rotate(3deg); }
+  75% { transform: translateY(-25px) rotate(-3deg); }
+}
+
+.hero h1 {
+  font-family: 'Bubblegum Sans', cursive;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center; margin-top: 1rem; z-index: 1;
+}
+
+.hero p { font-size: clamp(1rem,2.5vw,1.4rem); color: #64748B; text-align: center; margin-top: 0.5rem; z-index:1; }
+
+.start-btn {
+  margin-top: 2rem; padding: 1rem 3rem;
+  font-family: 'Bubblegum Sans', cursive; font-size: 1.5rem;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: white; border: none; border-radius: 50px;
+  cursor: pointer; z-index: 1;
+  transition: all 0.3s;
+  box-shadow: 0 8px 25px rgba(167,139,250,0.4);
+  position: relative; overflow: hidden;
+}
+.start-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 12px 35px rgba(167,139,250,0.5); }
+.start-btn::after { content: ' →'; }
+.start-btn:active { transform: scale(0.97); }
+
+.scroll-hint { position: absolute; bottom: 2rem; animation: scrollBounce 2s infinite; font-size: 1.5rem; color: #94A3B8; z-index:1; }
+@keyframes scrollBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(10px)} }
+
+/* ═══════ SCENES ═══════ */
+.scene {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2rem; scroll-snap-align: start; position: relative; z-index: 1;
+}
+
+.scene-number {
+  position: absolute; top: 1.5rem; left: 1.5rem;
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+  padding: 0.4rem 1rem; border-radius: 20px;
+  font-weight: 700; font-size: 0.9rem; color: var(--purple);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.scene h2 {
+  font-family: 'Bubblegum Sans', cursive;
+  font-size: clamp(1.6rem,4vw,2.8rem);
+  margin-bottom: 1rem; text-align: center;
+}
+
+.scene p { font-size: clamp(1rem,2vw,1.2rem); max-width: 600px; text-align: center; line-height: 1.8; color: #475569; }
+
+.scene-happy { background: linear-gradient(180deg,#F0F9FF,#E0F2FE); }
+.scene-skip { background: linear-gradient(180deg,#FFF7ED,#FFEDD5); }
+.scene-germs { background: linear-gradient(180deg,#FDF2F8,#FCE7F3); }
+.scene-cavity { background: linear-gradient(180deg,#FEF2F2,#FEE2E2); }
+.scene-dentist { background: linear-gradient(180deg,#ECFDF5,#D1FAE5); }
+.scene-team { background: linear-gradient(180deg,#EDE9FE,#C7D2FE); }
+.scene-game { background: linear-gradient(180deg,#EDE9FE,#DDD6FE); }
+
+/* ═══════ SPEECH BUBBLE ═══════ */
+.speech-bubble {
+  background: white; border-radius: 20px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin: 0.8rem 0; position: relative; max-width: 350px;
+}
+.speech-bubble::after {
+  content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+  border: 10px solid transparent; border-top-color: white;
+}
+.speech-bubble p { font-size: 1rem; color: #334155; }
+
+/* ═══════ CSS CHARACTERS ═══════ */
+.kid-face {
+  width: 120px; height: 120px; background: #FCD34D; border-radius: 50%;
+  position: relative; box-shadow: inset 0 -10px 20px rgba(0,0,0,0.1);
+}
+.kid-eyes { position: absolute; top: 35%; width: 100%; display: flex; justify-content: space-around; padding: 0 22px; }
+.kid-eye { width:14px; height:14px; background:#1E293B; border-radius:50%; position:relative; }
+.kid-eye::after { content:''; position:absolute; width:5px; height:5px; background:white; border-radius:50%; top:2px; right:2px; }
+.kid-mouth { position:absolute; bottom:28%; left:50%; transform:translateX(-50%); width:40px; height:20px; border-bottom:4px solid #1E293B; border-radius:0 0 20px 20px; }
+.kid-hair { position:absolute; top:-5px; left:10px; right:10px; height:30px; background:#92400E; border-radius:60px 60px 0 0; }
+.kid-cheeks { position:absolute; width:100%; top:50%; }
+.kid-cheek { position:absolute; width:16px; height:10px; background:rgba(255,107,157,0.5); border-radius:50%; }
+.kid-cheek:first-child { left:10px; } .kid-cheek:last-child { right:10px; }
+
+/* ═══════ TOOTH DISPLAY ═══════ */
+.tooth-main {
+  width:100px; height:120px; background:var(--tooth-white); border-radius:30px 30px 20px 20px;
+  position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.1), inset 0 -5px 15px rgba(0,0,0,0.03);
+  transition: all 1s;
+}
+.tooth-main .tooth-root { position:absolute; bottom:-25px; width:30px; height:30px; background:var(--tooth-white); border-radius:0 0 15px 15px; box-shadow:0 5px 10px rgba(0,0,0,0.05); }
+.tooth-main .tooth-root:first-child { left:15px; }
+.tooth-main .tooth-root:last-child { left:auto; right:15px; }
+.tooth-smile { position:absolute; top:45%; left:50%; transform:translateX(-50%); width:40px; height:18px; border-bottom:4px solid #CBD5E1; border-radius:0 0 20px 20px; }
+.tooth-eyes { position:absolute; top:30%; width:100%; display:flex; justify-content:space-around; padding:0 20px; }
+.tooth-eye { width:10px; height:10px; background:#475569; border-radius:50%; }
+
+.tooth-main.has-cavity .cavity { width:35px; height:30px; }
+.tooth-main.has-cavity { filter: saturate(0.7); }
+.tooth-main.has-cavity .tooth-smile { border-bottom:none; border-top:4px solid #CBD5E1; border-radius:20px 20px 0 0; top:50%; }
+.cavity { position:absolute; width:0; height:0; background:radial-gradient(circle,var(--cavity-brown),#78350F); border-radius:50%; top:50%; left:50%; transform:translate(-50%,-50%); transition: all 2s; }
+.pain-lines { position:absolute; inset:0; opacity:0; transition:opacity 1s; }
+.tooth-main.has-cavity .pain-lines { opacity:1; }
+.pain-line { position:absolute; width:3px; height:20px; background:var(--red); border-radius:2px; animation:zap 0.5s ease-in-out infinite alternate; }
+.pain-line:nth-child(1){top:10px;right:-15px;transform:rotate(15deg);}
+.pain-line:nth-child(2){top:25px;right:-20px;transform:rotate(30deg);animation-delay:0.15s;}
+.pain-line:nth-child(3){top:5px;left:-15px;transform:rotate(-15deg);animation-delay:0.3s;}
+.pain-line:nth-child(4){top:20px;left:-20px;transform:rotate(-30deg);animation-delay:0.45s;}
+@keyframes zap{0%{opacity:0.4;transform:scale(0.8)}100%{opacity:1;transform:scale(1.2)}}
+
+/* ═══════ GERMS ═══════ */
+.germ-attack { animation:attack 2s ease-in-out infinite; }
+@keyframes attack{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(20px,-10px) rotate(10deg)}50%{transform:translate(0,-20px) rotate(-5deg)}75%{transform:translate(-20px,-10px) rotate(5deg)}}
+
+/* ═══════ TIPS ═══════ */
+.tips-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; max-width:700px; width:100%; margin-top:1.5rem; }
+.tip-card { background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); border-radius:20px; padding:1.5rem; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.08); transition:transform 0.3s, box-shadow 0.3s; }
+.tip-card:hover { transform:translateY(-5px) scale(1.02); box-shadow:0 8px 30px rgba(0,0,0,0.12); }
+.tip-icon { font-size:2.5rem; margin-bottom:0.5rem; }
+.tip-card h3 { font-family:'Bubblegum Sans',cursive; font-size:1.1rem; margin-bottom:0.3rem; color:var(--purple); }
+.tip-card p { font-size:0.9rem; color:#64748B; line-height:1.5; }
+
+/* ═══════ TEAM HEROES ═══════ */
+.hero-team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; max-width:750px; width:100%; margin:1rem 0; }
+.hero-card { background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border-radius:20px; padding:1.2rem; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.08); transition:all 0.4s; border:3px solid transparent; }
+.hero-card.active { border-color:var(--green); background:#ECFDF5; transform:translateY(-5px) scale(1.03); }
+.hero-avatar { font-size:3rem; margin-bottom:0.4rem; transition:all 0.5s; filter:grayscale(0.4) drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+.hero-card.active .hero-avatar { filter:grayscale(0) drop-shadow(0 0 20px rgba(78,205,196,0.7)); animation:heroPulse 0.8s ease-in-out infinite; }
+@keyframes heroPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15) rotate(5deg)}}
+.hero-card h3 { font-family:'Bubblegum Sans',cursive; font-size:1rem; margin-bottom:0.2rem; color:var(--purple); }
+.hero-card p { font-size:0.8rem; color:#64748B; margin-bottom:0.6rem; line-height:1.4; }
+.hero-power { padding:0.5rem 1rem; background:linear-gradient(135deg,var(--purple),var(--blue)); color:white; border:none; border-radius:20px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; cursor:pointer; transition:all 0.3s; width:100%; }
+.hero-power:hover:not(:disabled){transform:scale(1.08);box-shadow:0 4px 15px rgba(167,139,250,0.4);}
+.hero-power:active:not(:disabled){transform:scale(0.95);}
+.hero-power:disabled{background:linear-gradient(135deg,var(--mint),var(--green));cursor:default;}
+
+/* ═══════ BOSS BATTLE ═══════ */
+.boss-area { text-align:center; margin:1rem 0; position:relative; }
+
+.boss-germ {
+  font-size: clamp(5rem,10vw,8rem);
+  display: inline-block;
+  transition: all 0.8s cubic-bezier(0.175,0.885,0.32,1.275);
+  filter: drop-shadow(0 8px 20px rgba(124,58,237,0.4));
+  animation: bossFloat 3s ease-in-out infinite;
+  position: relative;
+}
+
+@keyframes bossFloat {
+  0%,100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+}
+
+.boss-germ.hit {
+  animation: bossHit 0.3s ease-out;
+}
+
+@keyframes bossHit {
+  0% { transform: scale(1) rotate(0); filter: drop-shadow(0 8px 20px rgba(124,58,237,0.4)); }
+  25% { transform: scale(0.85) rotate(-10deg); filter: drop-shadow(0 0 30px rgba(248,113,113,0.8)); }
+  50% { transform: scale(1.1) rotate(5deg); }
+  100% { transform: scale(1) rotate(0); filter: drop-shadow(0 8px 20px rgba(124,58,237,0.4)); }
+}
+
+.boss-germ.defeated {
+  animation: bossDefeat 1.5s forwards;
+}
+
+@keyframes bossDefeat {
+  0% { transform: scale(1) rotate(0); opacity:1; filter: drop-shadow(0 8px 20px rgba(124,58,237,0.4)); }
+  30% { transform: scale(1.2) rotate(10deg); filter: drop-shadow(0 0 40px rgba(248,113,113,0.9)); }
+  100% { transform: scale(0) rotate(360deg); opacity:0; filter: drop-shadow(0 0 60px rgba(78,205,196,0.9)); }
+}
+
+.boss-name {
+  font-family:'Bubblegum Sans',cursive; font-size:1.5rem; color:#7C3AED;
+  margin-top:0.5rem;
+}
+
+.boss-hp-container {
+  width: min(400px, 80vw); height: 24px;
+  background: rgba(255,255,255,0.5); border-radius: 12px;
+  overflow: hidden; margin: 0.8rem auto;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.boss-hp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--red), #EF4444);
+  border-radius: 12px;
+  transition: width 0.6s ease;
+  position: relative;
+}
+
+.boss-hp-bar::after {
+  content: '';
+  position: absolute; top: 2px; left: 5px; right: 5px;
+  height: 6px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+.boss-hp-bar.low { background: linear-gradient(90deg, #FCD34D, var(--orange)); }
+.boss-hp-bar.critical { background: linear-gradient(90deg, var(--green), #22C55E); }
+
+.boss-hp-text {
+  font-weight:800; font-size:0.9rem; color:#7C3AED;
+  margin-top:0.3rem;
+}
+
+/* Damage numbers */
+.damage-num {
+  position: absolute;
+  font-family: 'Bubblegum Sans', cursive;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--red);
+  pointer-events: none;
+  animation: damageFloat 1s ease-out forwards;
+  z-index: 10;
+  text-shadow: 2px 2px 0 white, -1px -1px 0 white;
+}
+
+@keyframes damageFloat {
+  0% { opacity:1; transform: translateY(0) scale(1); }
+  50% { opacity:1; transform: translateY(-40px) scale(1.3); }
+  100% { opacity:0; transform: translateY(-80px) scale(0.8); }
+}
+
+/* ═══════ GERM ARMY (minions) ═══════ */
+.germ-army {
+  display:flex; flex-wrap:wrap; gap:0.3rem;
+  justify-content:center; max-width:500px;
+  margin:0.5rem 0; min-height:40px;
+}
+.germ-soldier {
+  font-size:1.8rem;
+  transition:all 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+  animation:germShake 0.8s ease-in-out infinite;
+}
+.germ-soldier.defeated { opacity:0; transform:scale(0) rotate(360deg); }
+@keyframes germShake{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
+
+.team-progress { width:100%; max-width:400px; text-align:center; margin-top:0.5rem; }
+.team-progress p { font-weight:700; color:var(--purple); margin-top:0.5rem; }
+
+/* ═══════ BRUSH GAME ═══════ */
+.brush-timer-game { text-align:center; }
+
+.timer-circle {
+  width:180px; height:180px; border-radius:50%;
+  background:white; display:flex; align-items:center; justify-content:center;
+  margin:1rem auto; box-shadow:0 8px 30px rgba(0,0,0,0.1);
+  position:relative;
+}
+.timer-circle::before { content:''; position:absolute; inset:-6px; border-radius:50%; border:6px solid #E2E8F0; }
+.timer-circle.active::before { border-color:var(--mint); border-top-color:transparent; animation:spin 2s linear infinite; }
+.timer-circle.active { animation: timerPulse 1s ease-in-out infinite; }
+@keyframes timerPulse { 0%,100%{box-shadow:0 8px 30px rgba(0,0,0,0.1)} 50%{box-shadow:0 8px 30px rgba(78,205,196,0.3)} }
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes floatGerm{0%,100%{transform:translate(0,0) rotate(0)}33%{transform:translate(10px,-15px) rotate(20deg)}66%{transform:translate(-10px,-5px) rotate(-15deg)}}
+.timer-circle .time { font-family:'Bubblegum Sans',cursive; font-size:3rem; color:var(--dark); }
+
+.timer-circle.warning::before { border-color:var(--red); border-top-color:transparent; }
+.timer-circle.warning { animation:warningPulse 0.5s ease-in-out infinite; }
+@keyframes warningPulse { 0%,100%{box-shadow:0 8px 30px rgba(248,113,113,0.2)} 50%{box-shadow:0 8px 30px rgba(248,113,113,0.5)} }
+
+.brush-btn {
+  padding:0.8rem 2.5rem; font-family:'Bubblegum Sans',cursive; font-size:1.3rem;
+  background:linear-gradient(135deg,var(--mint),var(--green));
+  color:white; border:none; border-radius:50px; cursor:pointer;
+  margin-top:1rem; transition:all 0.3s;
+  box-shadow:0 5px 20px rgba(78,205,196,0.4);
+}
+.brush-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(78,205,196,0.5);}
+.brush-btn:active{transform:scale(0.97);}
+.brush-btn:disabled{background:#CBD5E1;cursor:not-allowed;box-shadow:none;}
+
+/* Custom toothbrush cursor for game area */
+.brush-cursor-active {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext y='34' font-size='34'%3E🪥%3C/text%3E%3C/svg%3E") 10 10, crosshair !important;
+}
+
+/* Foam bubbles */
+.foam-bubble {
+  position:absolute;
+  width:10px; height:10px;
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.9),rgba(78,205,196,0.3));
+  border-radius:50%;
+  border:1px solid rgba(78,205,196,0.2);
+  pointer-events:none;
+  animation: foamFloat 1s ease-out forwards;
+}
+
+@keyframes foamFloat {
+  0% { transform:translateY(0) scale(0.5); opacity:1; }
+  100% { transform:translateY(-60px) scale(1.5); opacity:0; }
+}
+
+.steps { display:flex; gap:0.5rem; margin:1rem 0; flex-wrap:wrap; justify-content:center; }
+.step { width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.6); border:2px solid #E2E8F0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; color:#94A3B8; transition:all 0.3s; }
+.step.done { background:var(--mint); border-color:var(--green); color:white; }
+.step.current { background:var(--purple); border-color:var(--purple); color:white; transform:scale(1.15); }
+
+.progress-container { width:100%; max-width:300px; height:20px; background:rgba(255,255,255,0.5); border-radius:10px; margin-top:1rem; overflow:hidden; box-shadow:inset 0 2px 5px rgba(0,0,0,0.1); }
+.progress-bar { height:100%; background:linear-gradient(90deg,var(--mint),var(--green)); border-radius:10px; transition:width 0.5s; position:relative; }
+.progress-bar::after { content:''; position:absolute; top:2px; left:5px; right:5px; height:6px; background:rgba(255,255,255,0.4); border-radius:3px; }
+
+/* ═══════ QUIZ ═══════ */
+.quiz-container { max-width:500px; width:100%; margin-top:1rem; }
+.quiz-question { background:white; border-radius:20px; padding:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.08); margin-bottom:1rem; }
+.quiz-question h3 { font-family:'Bubblegum Sans',cursive; font-size:1.2rem; margin-bottom:1rem; color:var(--purple); }
+.quiz-options { display:flex; flex-direction:column; gap:0.5rem; }
+.quiz-option { padding:0.8rem 1.2rem; border:2px solid #E2E8F0; border-radius:12px; background:white; cursor:pointer; transition:all 0.3s; font-family:'Nunito',sans-serif; font-size:1rem; text-align:left; }
+.quiz-option:hover:not(:disabled){border-color:var(--purple);background:#F5F3FF;transform:translateX(5px);}
+.quiz-option:active:not(:disabled){transform:scale(0.98);}
+.quiz-option.correct{border-color:var(--green);background:#ECFDF5;color:#065F46;}
+.quiz-option.wrong{border-color:var(--red);background:#FEF2F2;color:#991B1B;}
+.quiz-feedback{margin-top:0.8rem;padding:0.8rem;border-radius:12px;text-align:center;font-weight:700;display:none;}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.correct-fb{background:#ECFDF5;color:#065F46;}
+.quiz-feedback.wrong-fb{background:#FEF2F2;color:#991B1B;}
+
+.fact-ticker{background:white;border-radius:15px;padding:0.8rem 1.5rem;margin-top:1rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);font-size:0.95rem;color:var(--purple);text-align:center;animation:slideUp 0.5s;max-width:400px;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════ REWARD ═══════ */
+.reward-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:1000; }
+.reward-overlay.show{display:flex;animation:fadeIn 0.5s;}
+.reward-box{background:white;border-radius:30px;padding:3rem 2rem;text-align:center;max-width:350px;width:90%;animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);}
+@keyframes popIn{0%{transform:scale(0.5);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+.reward-emoji{font-size:4rem;}
+.reward-box h2{font-family:'Bubblegum Sans',cursive;color:var(--green);font-size:2rem;margin:0.5rem 0;}
+.reward-box p{color:#64748B;margin-bottom:1rem;}
+.reward-btn{padding:0.8rem 2rem;background:linear-gradient(135deg,var(--mint),var(--green));color:white;border:none;border-radius:50px;font-family:'Bubblegum Sans',cursive;font-size:1.2rem;cursor:pointer;transition:all 0.3s;}
+.reward-btn:hover{transform:scale(1.05);}
+
+/* ═══════ CONFETTI ═══════ */
+.confetti{position:fixed;top:-10px;z-index:1001;animation:confettiFall linear forwards;pointer-events:none;}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+/* ═══════ NAV ═══════ */
+.nav-dots{position:fixed;right:1rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:0.5rem;z-index:100;}
+.nav-dot{width:12px;height:12px;border-radius:50%;background:rgba(0,0,0,0.15);cursor:pointer;transition:all 0.3s;border:none;}
+.nav-dot.active{background:var(--purple);transform:scale(1.3);}
+.nav-dot:hover{background:var(--pink);}
+
+/* ═══════ FINAL ═══════ */
+.final-cta{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#ECFDF5,#D1FAE5,#E0F2FE);scroll-snap-align:start;padding:2rem;text-align:center;}
+.final-cta h2{font-family:'Bubblegum Sans',cursive;font-size:clamp(2rem,5vw,3rem);color:var(--green);margin-bottom:1rem;}
+.final-cta p{font-size:1.2rem;color:#475569;max-width:500px;line-height:1.8;}
+.big-smile{font-size:6rem;margin:1rem 0;animation:toothBounce 2s ease-in-out infinite;}
+
+/* ═══════ REVEAL ═══════ */
+.reveal{opacity:0;transform:translateY(30px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:0.1s;}
+.reveal-delay-2{transition-delay:0.2s;}
+.reveal-delay-3{transition-delay:0.3s;}
+
+/* ═══════ DENTIST SPARKLE ═══════ */
+.dentist-tooth{width:140px;height:160px;background:white;border-radius:30px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,0.15);overflow:hidden;}
+.dentist-tooth.clean{animation:sparkle 1.5s ease-in-out infinite;}
+@keyframes sparkle{0%,100%{box-shadow:0 10px 40px rgba(0,0,0,0.15),0 0 0 0 rgba(78,205,196,0)}50%{box-shadow:0 10px 40px rgba(0,0,0,0.15),0 0 30px 5px rgba(78,205,196,0.3)}}
+.sparkle-star{position:absolute;font-size:1.5rem;animation:twinkle 1s ease-in-out infinite;}
+.sparkle-star:nth-child(1){top:5%;right:5%;animation-delay:0s;}
+.sparkle-star:nth-child(2){top:30%;left:-10%;animation-delay:0.3s;}
+.sparkle-star:nth-child(3){bottom:20%;right:-5%;animation-delay:0.6s;}
+@keyframes twinkle{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}
+
+/* ═══════ RESPONSIVE ═══════ */
+@media(max-width:600px){
+  .tips-grid{grid-template-columns:1fr;}
+  .hero-team-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));}
+  .nav-dots{right:0.5rem;}
+  .nav-dot{width:8px;height:8px;}
+}
+
+/* ═══════ SCREEN SHAKE ═══════ */
+.screen-shake {
+  animation: screenShake 0.4s ease-out;
+}
+@keyframes screenShake {
+  0%,100% { transform: translate(0); }
+  15% { transform: translate(-4px, 2px); }
+  30% { transform: translate(4px, -2px); }
+  45% { transform: translate(-2px, 4px); }
+  60% { transform: translate(2px, -4px); }
+  75% { transform: translate(-1px, 1px); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ PARTICLES ═══════ -->
+<div class="particles" id="particles"></div>
+
+<!-- ═══════ SOUND TOGGLE ═══════ -->
+<button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Toggle Suara">🔊</button>
+
+<!-- ═══════ STAR RATING BAR ═══════ -->
+<div class="stars-bar" id="starsBar">
+  <span class="star" id="star0">⭐</span>
+  <span class="star" id="star1">⭐</span>
+  <span class="star" id="star2">⭐</span>
+  <span class="star" id="star3">⭐</span>
+  <span class="star" id="star4">⭐</span>
+  <span class="star" id="star5">⭐</span>
+  <span class="star" id="star6">⭐</span>
+  <span class="star" id="star7">⭐</span>
+  <span class="star" id="star8">⭐</span>
+  <span class="star" id="star9">⭐</span>
+  <span class="count" id="starCount">0/10</span>
+</div>
+
+<!-- ═══════ NAV DOTS ═══════ -->
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- ═══════ SCENE 0: HERO ═══════ -->
+<section class="hero" id="scene0" data-scene="0">
+  <div class="hero-bg-orb"></div><div class="hero-bg-orb"></div><div class="hero-bg-orb"></div>
+  <div class="giant-tooth">🦷</div>
+  <h1>Petualangan Gigi Sehat!</h1>
+  <p>Yuk ikuti cerita Riko menjaga giginya ✨</p>
+  <button class="start-btn" onclick="playSound('click');scrollToScene(1)">Mulai Petualangan</button>
+  <div class="scroll-hint">👇</div>
+</section>
+
+<!-- ═══════ SCENE 1: PAGI CERAH ═══════ -->
+<section class="scene scene-happy" id="scene1" data-scene="1">
+  <span class="scene-number">📖 Bab 1</span>
+  <h2>🌅 Pagi yang Cerah</h2>
+  <div class="character">
+    <div class="kid-face">
+      <div class="kid-hair"></div>
+      <div class="kid-eyes"><div class="kid-eye"></div><div class="kid-eye"></div></div>
+      <div class="kid-cheeks"><div class="kid-cheek"></div><div class="kid-cheek"></div></div>
+      <div class="kid-mouth"></div>
+    </div>
+  </div>
+  <div class="speech-bubble reveal">
+    <p>"Hari ini Riko bangun dengan wajah ceria! Tapi... ada sesuatu yang Riko malas lakukan..."</p>
+  </div>
+  <p class="reveal">Riko melihat sikat giginya... "Hhh, males ah..." 😴</p>
+</section>
+
+<!-- ═══════ SCENE 2: MALAS GOSOK ═══════ -->
+<section class="scene scene-skip" id="scene2" data-scene="2">
+  <span class="scene-number">📖 Bab 2</span>
+  <h2>😅 Malas Gosok Gigi</h2>
+  <div class="speech-bubble reveal">
+    <p>"Ah, cuma sekali doang gapapa kali ya..." 😏</p>
+  </div>
+  <p class="reveal" style="font-weight:700;color:var(--orange);">Tapi tunggu dulu... 👀</p>
+  <p class="reveal">Setiap kali kita tidak gosok gigi, <strong>sisa makanan</strong> tetap ada di gigi! 🍬🧁🍩</p>
+  <div class="fact-ticker reveal">⚡ Gigi punya <strong>5 permukaan</strong>! Atas, kanan, kiri, depan, belakang — semua harus dibersihkan!</div>
+</section>
+
+<!-- ═══════ SCENE 3: KUMAN MENYERANG ═══════ -->
+<section class="scene scene-germs" id="scene3" data-scene="3">
+  <span class="scene-number">📖 Bab 3</span>
+  <h2>🦠 Kuman Menyerang!</h2>
+  <div class="germs-container reveal" style="position:relative;width:280px;height:180px;margin:1rem auto;">
+    <div class="tooth-main" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(1.2);z-index:1;">
+      <div class="tooth-root"></div><div class="tooth-root"></div>
+      <div class="tooth-eyes"><div class="tooth-eye" style="width:12px;height:14px;"></div><div class="tooth-eye" style="width:12px;height:14px;"></div></div>
+      <div class="tooth-smile" style="width:30px;height:14px;"></div>
+    </div>
+    <div class="germ germ-attack" style="position:absolute;top:5%;left:5%;">🦠</div>
+    <div class="germ germ-attack" style="position:absolute;top:25%;right:8%;animation-delay:0.2s;">👾</div>
+    <div class="germ germ-attack" style="position:absolute;bottom:12%;left:15%;animation-delay:0.4s;">👹</div>
+    <div class="germ germ-attack" style="position:absolute;top:5%;right:20%;animation-delay:0.6s;">🦠</div>
+    <div class="germ germ-attack" style="position:absolute;bottom:5%;right:5%;animation-delay:0.3s;">👾</div>
+  </div>
+  <div class="speech-bubble reveal">
+    <p>"Mwahahaha! Riko tidak gosok gigi! Kami akan membuat <strong>lubang</strong>!" 😈</p>
+  </div>
+  <button class="brush-btn reveal" onclick="showCavity()" id="cavityBtn">Tunjukkan Apa yang Terjadi! 👀</button>
+</section>
+
+<!-- ═══════ SCENE 4: LUBANG GIGI ═══════ -->
+<section class="scene scene-cavity" id="scene4" data-scene="4">
+  <span class="scene-number">📖 Bab 4</span>
+  <h2>😣 Aduh... Lubang Gigi!</h2>
+  <div class="tooth-main has-cavity" id="tooth3" style="transform:scale(1.4);">
+    <div class="tooth-root"></div><div class="tooth-root"></div>
+    <div class="tooth-eyes"><div class="tooth-eye" style="width:8px;height:12px;"></div><div class="tooth-eye" style="width:8px;height:12px;"></div></div>
+    <div class="tooth-smile" style="border-bottom:none;border-top:4px solid #CBD5E1;border-radius:20px 20px 0 0;top:50%;"></div>
+    <div class="cavity" style="width:35px;height:30px;"></div>
+    <div class="pain-lines"><div class="pain-line"></div><div class="pain-line"></div><div class="pain-line"></div><div class="pain-line"></div></div>
+  </div>
+  <div class="speech-bubble reveal" style="background:#FEE2E2;">
+    <p>"AAARRRGHH! Sakitnya luar biasa!" 😭</p>
+  </div>
+  <p class="reveal">Riko harus ke <strong>dokter gigi</strong>! Kalau tidak, lubangnya semakin besar! 😱</p>
+</section>
+
+<!-- ═══════ SCENE 5: DOKTER GIGI ═══════ -->
+<section class="scene scene-dentist" id="scene5" data-scene="5">
+  <span class="scene-number">📖 Bab 5</span>
+  <h2>👨‍⚕️ Kunjungan ke Dokter Gigi</h2>
+  <div class="speech-bubble reveal" style="background:#ECFDF5;">
+    <p>"Halo Riko! Jangan takut, dokter di sini untuk membantu!" 😊</p>
+  </div>
+  <div class="dentist-tooth clean" style="transform:scale(1.3);margin:1rem auto;">
+    <div class="tooth-root"></div><div class="tooth-root" style="left:auto;right:15px;"></div>
+    <div class="tooth-eyes"><div class="tooth-eye"></div><div class="tooth-eye"></div></div>
+    <div class="tooth-smile"></div>
+    <div class="sparkle-star">✨</div><div class="sparkle-star">✨</div><div class="sparkle-star">✨</div>
+  </div>
+  <p class="reveal">Dokter membersihkan gigi Riko dan menambal lubangnya. Gigi bersih kembali! 🎉</p>
+  <div class="tips-grid reveal">
+    <div class="tip-card"><div class="tip-icon">🪥</div><h3>Gosok 2x Sehari</h3><p>Pagi setelah sarapan & malam sebelum tidur</p></div>
+    <div class="tip-card"><div class="tip-icon">⏱️</div><h3>2 Menit Setiap Kali</h3><p>Seluruh permukaan gigi harus dibersihkan</p></div>
+    <div class="tip-card"><div class="tip-icon">🍬</div><h3>Kurangi Gula</h3><p>Kurangi permen & minuman manis</p></div>
+  </div>
+</section>
+
+<!-- ═══════ SCENE 6: TIM PAHLAWAN GIGI ═══════ -->
+<section class="scene scene-team" id="scene6" data-scene="6">
+  <span class="scene-number">🦸 Bab 6</span>
+  <h2>🦸 Tim Pahlawan vs Cavitarus!</h2>
+  <div class="speech-bubble reveal" style="background:#EDE9FE;">
+    <p>"Rahasia: semua agen harus <strong>bekerja sama</strong> untuk mengalahkan musuh terbesar!" 🤝</p>
+  </div>
+
+  <!-- Boss -->
+  <div class="boss-area reveal">
+    <div class="boss-germ" id="bossGerm">🦠</div>
+    <div class="boss-name" id="bossName">👑 CAVITARUS — Raja Kuman</div>
+    <div class="boss-hp-container">
+      <div class="boss-hp-bar" id="bossHpBar" style="width:100%"></div>
+    </div>
+    <div class="boss-hp-text" id="bossHpText">❤️ 1000 / 1000 HP</div>
+  </div>
+
+  <!-- Hero Cards -->
+  <div class="hero-team-grid reveal" id="heroTeam">
+    <div class="hero-card" data-hero="brush">
+      <div class="hero-avatar">🪥</div>
+      <h3>Kapten Sikat</h3>
+      <p>Kekuatan: -200 HP</p>
+      <button class="hero-power" onclick="activateHero('brush')">Serang! ⚡</button>
+    </div>
+    <div class="hero-card" data-hero="floss">
+      <div class="hero-avatar">🧵</div>
+      <h3>Sersan Benang</h3>
+      <p>Kekuatan: -150 HP</p>
+      <button class="hero-power" onclick="activateHero('floss')">Serang! ⚡</button>
+    </div>
+    <div class="hero-card" data-hero="mouthwash">
+      <div class="hero-avatar">💧</div>
+      <h3>Letnan Kumur</h3>
+      <p>Kekuatan: -150 HP</p>
+      <button class="hero-power" onclick="activateHero('mouthwash')">Serang! ⚡</button>
+    </div>
+    <div class="hero-card" data-hero="dentist">
+      <div class="hero-avatar">👨‍⚕️</div>
+      <h3>Dokter Gigi</h3>
+      <p>Kekuatan: -200 HP</p>
+      <button class="hero-power" onclick="activateHero('dentist')">Serang! ⚡</button>
+    </div>
+    <div class="hero-card" data-hero="paste">
+      <div class="hero-avatar">✨</div>
+      <h3>Pasta Ajaib</h3>
+      <p>Kekuatan: -300 HP</p>
+      <button class="hero-power" onclick="activateHero('paste')">Serang! ⚡</button>
+    </div>
+  </div>
+
+  <div class="team-progress reveal">
+    <p id="teamStatus">Aktifkan semua pahlawan untuk mengalahkan Cavitarus! 💪</p>
+  </div>
+  <button class="brush-btn" id="teamVictoryBtn" style="display:none;" onclick="playSound('victory');scrollToScene(7)">Lanjut ke Sikat Gigi! 🪥</button>
+</section>
+
+<!-- ═══════ SCENE 7: MINI GAME SIKAT GIGI ═══════ -->
+<section class="scene scene-game" id="scene7" data-scene="7">
+  <span class="scene-number">🎮 Mini Game</span>
+  <h2>🪥 Yuk Gosok Gigi!</h2>
+  <p>Klik area gigi untuk membersihkannya! Bersihkan semua dalam 30 detik!</p>
+
+  <div class="brush-timer-game">
+    <div style="position:relative;width:200px;height:200px;margin:0 auto;" id="brushGameArea">
+      <div class="tooth-main" style="width:120px;height:130px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 8px 25px rgba(0,0,0,0.1);" id="gameTooth">
+        <div class="tooth-root"></div><div class="tooth-root" style="left:auto;right:15px;"></div>
+        <div class="tooth-eyes"><div class="tooth-eye"></div><div class="tooth-eye"></div></div>
+        <div class="tooth-smile"></div>
+      </div>
+      <div id="floatingGerms" style="position:absolute;inset:0;transition:opacity 1s;">
+        <span class="mini-germ" style="position:absolute;top:8%;left:5%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;">🦠</span>
+        <span class="mini-germ" style="position:absolute;top:15%;right:8%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;animation-delay:0.5s;">👾</span>
+        <span class="mini-germ" style="position:absolute;bottom:22%;left:12%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;animation-delay:1s;">👹</span>
+        <span class="mini-germ" style="position:absolute;top:3%;right:20%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;animation-delay:1.5s;">🦠</span>
+        <span class="mini-germ" style="position:absolute;bottom:8%;right:5%;font-size:1.5rem;animation:floatGerm 3s ease-in-out infinite;animation-delay:0.8s;">👾</span>
+      </div>
+      <div id="cleanSparkles" style="position:absolute;inset:0;opacity:0;transition:opacity 1s;">
+        <span style="position:absolute;top:5%;left:10%;font-size:1.2rem;">✨</span>
+        <span style="position:absolute;top:15%;right:5%;font-size:1.2rem;">⭐</span>
+        <span style="position:absolute;bottom:25%;left:5%;font-size:1.2rem;">✨</span>
+        <span style="position:absolute;bottom:15%;right:10%;font-size:1.2rem;">💫</span>
+        <span style="position:absolute;top:40%;left:0;font-size:1.2rem;">⭐</span>
+      </div>
+    </div>
+
+    
+
+    <div class="timer-circle" id="timerCircle">
+      <span class="time" id="timerDisplay">30</span>
+    </div>
+
+    <div class="steps" id="brushSteps">
+      <div class="step current" data-zone="0">1</div>
+      <div class="step" data-zone="1">2</div>
+      <div class="step" data-zone="2">3</div>
+      <div class="step" data-zone="3">4</div>
+      <div class="step" data-zone="4">5</div>
+    </div>
+
+    <div class="progress-container" style="margin:1rem auto;">
+      <div class="progress-bar" id="brushProgress" style="width:0%"></div>
+    </div>
+
+    <p id="brushInstruction" style="font-weight:700;color:var(--purple);min-height:1.5em;">Tekan tombol untuk mulai! 🪥</p>
+    <button class="brush-btn" id="brushStartBtn" onclick="startBrushGame()">Mulai Gosok! 🪥</button>
+    <div id="brushZones" style="display:none;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;"></div>
+  </div>
+</section>
+
+<!-- ═══════ SCENE 8: KUIS ═══════ -->
+<section class="scene" id="scene8" data-scene="8" style="background:linear-gradient(180deg,#F0F9FF,#E0F2FE);">
+  <span class="scene-number">🧠 Kuis</span>
+  <h2>🧪 Cek Pengetahuanmu!</h2>
+  <p>Jawab pertanyaan ini untuk membuktikan kamu sudah jago menjaga gigi!</p>
+  <div class="quiz-container" id="quizContainer"></div>
+</section>
+
+<!-- ═══════ SCENE 9: FINAL ═══════ -->
+<section class="final-cta" id="scene9" data-scene="9">
+  <div class="big-smile">😁</div>
+  <h2>Selamat!</h2>
+  <p>Sekarang kamu tahu pentingnya menjaga kesehatan gigi! Ingat: <strong>Gosok gigi 2x sehari, kurangi gula, kunjungi dokter gigi rutin, dan ingat — kerja sama tim selalu menang!</strong></p>
+  <p style="margin-top:1rem;font-size:0.9rem;color:#94A3B8;">Petualangan Gigi Sehat v2 — Dibuat untuk anak-anak hebat! 💙</p>
+  <button class="start-btn" onclick="playSound('victory');scrollToScene(0)" style="margin-top:2rem;">🔄 Mulai Lagi</button>
+</section>
+
+<!-- ═══════ REWARD OVERLAY ═══════ -->
+<div class="reward-overlay" id="rewardOverlay">
+  <div class="reward-box">
+    <div class="reward-emoji" id="rewardEmoji">🏆</div>
+    <h2 id="rewardTitle">Hebat Sekali!</h2>
+    <p id="rewardText"></p>
+    <button class="reward-btn" onclick="closeReward()">Lanjutkan →</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// 🎵 SOUND ENGINE (Web Audio API)
+// ═══════════════════════════════════════
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSound(type) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+
+    if (type === 'click') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now+0.1);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now+0.1);
+      osc.start(now); osc.stop(now+0.1);
+
+    } else if (type === 'brush') {
+      const bufferSize = ctx.sampleRate * 0.15;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random()*2-1) * 0.15;
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass'; filter.frequency.value = 3000; filter.Q.value = 2;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now+0.15);
+      noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+      noise.start(now); noise.stop(now+0.15);
+
+    } else if (type === 'germHit') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(200, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now+0.2);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now+0.2);
+      osc.start(now); osc.stop(now+0.2);
+
+    } else if (type === 'bossHit') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(50, now+0.3);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now+0.3);
+      osc.start(now); osc.stop(now+0.3);
+      // second harmonic
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2); gain2.connect(ctx.destination);
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(400, now);
+      osc2.frequency.exponentialRampToValueAtTime(100, now+0.15);
+      gain2.gain.setValueAtTime(0.15, now);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now+0.15);
+      osc2.start(now); osc2.stop(now+0.15);
+
+    } else if (type === 'victory') {
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = now + i*0.15;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.3, t+0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, t+0.4);
+        osc.start(t); osc.stop(t+0.4);
+      });
+
+    } else if (type === 'wrong') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(200, now);
+      osc.frequency.setValueAtTime(150, now+0.15);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now+0.3);
+      osc.start(now); osc.stop(now+0.3);
+    }
+  } catch(e) {}
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('soundToggle');
+  btn.textContent = soundEnabled ? '🔊' : '🔇';
+  btn.classList.toggle('muted', !soundEnabled);
+}
+
+// ═══════════════════════════════════════
+// ✨ PARTICLE SYSTEM
+// ═══════════════════════════════════════
+function initParticles() {
+  const container = document.getElementById('particles');
+  const particleChars = ['🦷','✨','⭐','💫','🦷','🌟'];
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('span');
+    p.className = 'particle';
+    p.textContent = particleChars[i % particleChars.length];
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (10 + Math.random() * 20) + 's';
+    p.style.animationDelay = (Math.random() * 15) + 's';
+    p.style.fontSize = (12 + Math.random() * 16) + 'px';
+    container.appendChild(p);
+  }
+}
+initParticles();
+
+// ═══════════════════════════════════════
+// ⭐ STAR RATING
+// ═══════════════════════════════════════
+let starsEarned = JSON.parse(localStorage.getItem('dentalStars') || '[]');
+let totalStars = 0;
+
+function updateStarsUI() {
+  totalStars = starsEarned.length;
+  for (let i = 0; i < 10; i++) {
+    const el = document.getElementById('star'+i);
+    if (el) el.classList.toggle('earned', starsEarned.includes(i));
+  }
+  document.getElementById('starCount').textContent = totalStars + '/10';
+}
+
+function earnStar(index) {
+  if (!starsEarned.includes(index)) {
+    starsEarned.push(index);
+    localStorage.setItem('dentalStars', JSON.stringify(starsEarned));
+    playSound('victory');
+  }
+  updateStarsUI();
+}
+
+updateStarsUI();
+
+// ═══════════════════════════════════════
+// 🧭 NAVIGATION
+// ═══════════════════════════════════════
+const scenes = document.querySelectorAll('[data-scene]');
+const navDots = document.getElementById('navDots');
+let currentScene = 0;
+
+scenes.forEach((s, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', 'Scene ' + i);
+  dot.onclick = () => { playSound('click'); scrollToScene(i); };
+  navDots.appendChild(dot);
+});
+
+function scrollToScene(index) {
+  const el = document.getElementById('scene' + index);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+const sceneObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      const idx = parseInt(entry.target.dataset.scene);
+      if (!isNaN(idx)) {
+        currentScene = idx;
+        document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+        // Earn star on reaching scene
+        earnStar(idx);
+      }
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.reveal').forEach(el => sceneObserver.observe(el));
+scenes.forEach(el => sceneObserver.observe(el));
+
+// ═══════════════════════════════════════
+// 😣 CAVITY ANIMATION
+// ═══════════════════════════════════════
+let cavityShown = false;
+function showCavity() {
+  if (cavityShown) return;
+  cavityShown = true;
+  playSound('germHit');
+  const btn = document.getElementById('cavityBtn');
+  btn.textContent = '😱 Lubangnya makin besar!';
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+
+  setTimeout(() => {
+    document.body.classList.add('screen-shake');
+    setTimeout(() => document.body.classList.remove('screen-shake'), 500);
+    scrollToScene(4);
+  }, 1500);
+}
+
+// ═══════════════════════════════════════
+// 🦸 BOSS BATTLE
+// ═══════════════════════════════════════
+let bossHp = 1000;
+const bossMaxHp = 1000;
+const HERO_DAMAGE = { brush: 200, floss: 150, mouthwash: 150, dentist: 200, paste: 300 };
+let heroesActivated = {};
+let bossDefeated = false;
+
+function activateHero(heroKey) {
+  if (heroesActivated[heroKey] || bossDefeated) return;
+  heroesActivated[heroKey] = true;
+
+  const card = document.querySelector(`.hero-card[data-hero="${heroKey}"]`);
+  card.classList.add('active');
+  const btn = card.querySelector('.hero-power');
+  btn.disabled = true;
+  btn.textContent = '✅ Aktif!';
+
+  playSound('bossHit');
+
+  // Damage boss
+  const dmg = HERO_DAMAGE[heroKey];
+  bossHp = Math.max(0, bossHp - dmg);
+
+  // HP bar animation
+  const pct = (bossHp / bossMaxHp) * 100;
+  const bar = document.getElementById('bossHpBar');
+  bar.style.width = pct + '%';
+  bar.className = 'boss-hp-bar' + (pct <= 20 ? ' critical' : pct <= 50 ? ' low' : '');
+  document.getElementById('bossHpText').textContent = `❤️ ${bossHp} / ${bossMaxHp} HP`;
+
+  // Boss hit animation
+  const boss = document.getElementById('bossGerm');
+  boss.classList.remove('hit');
+  void boss.offsetWidth; // force reflow
+  boss.classList.add('hit');
+
+  // Screen shake
+  document.body.classList.add('screen-shake');
+  setTimeout(() => document.body.classList.remove('screen-shake'), 400);
+
+  // Spawn damage number
+  spawnDamageNum(boss, dmg);
+
+  // Status text
+  const active = Object.keys(heroesActivated).length;
+  const HERO_NAMES = { brush:'Kapten Sikat🪥', floss:'Sersan Benang🧵', mouthwash:'Letnan Kumur💧', dentist:'Dokter Gigi👨‍⚕️', paste:'Pasta Ajaib✨' };
+  const status = document.getElementById('teamStatus');
+
+  if (bossHp <= 0) {
+    // BOSS DEFEATED!
+    bossDefeated = true;
+    boss.classList.remove('hit');
+    boss.classList.add('defeated');
+    status.innerHTML = '🎉 <strong>CAVITARUS KALAH! Kerja sama tim berhasil! 🏆</strong>';
+    createConfetti();
+    showReward('🤝', 'Kerja Sama Berhasil!', 'Tim pahlawan gigi bekerja sama dan mengalahkan Cavitarus! Bersama kita kuat! 💪🌟');
+    document.getElementById('teamVictoryBtn').style.display = '';
+  } else {
+    status.textContent = `${active}/5 pahlawan aktif — Cavitarus: ${bossHp} HP! ${HERO_NAMES[heroKey]} menyerang! 💥`;
+  }
+}
+
+function spawnDamageNum(target, dmg) {
+  const rect = target.getBoundingClientRect();
+  const num = document.createElement('div');
+  num.className = 'damage-num';
+  num.textContent = '-' + dmg;
+  num.style.left = (rect.left + rect.width/2 - 20) + 'px';
+  num.style.top = (rect.top - 10) + 'px';
+  document.body.appendChild(num);
+  setTimeout(() => num.remove(), 1000);
+}
+
+// ═══════════════════════════════════════
+// 🪥 BRUSH GAME
+// ═══════════════════════════════════════
+const ZONE_LABELS = ['🦠 Atas', '🦠 Kanan', '🦠 Kiri', '🦠 Depan', '🦠 Belakang'];
+const INSTRUCTIONS = [
+  'Bersihkan permukaan ATAS gigi!',
+  'Bersihkan sisi KANAN gigi!',
+  'Bersihkan sisi KIRI gigi!',
+  'Bersihkan bagian DEPAN gigi!',
+  'Bersihkan bagian BELAKANG gigi!'
+];
+let brushZones = [false,false,false,false,false];
+let brushTimer = null;
+let brushTimeLeft = 30;
+let brushStarted = false;
+let brushGameDone = false;
+
+function createBrushZones() {
+  const c = document.getElementById('brushZones');
+  c.style.display = 'flex';
+  ZONE_LABELS.forEach((label, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'brush-btn';
+    btn.style.fontSize = '0.95rem';
+    btn.style.padding = '0.5rem 0.9rem';
+    btn.style.background = 'linear-gradient(135deg, var(--yellow), var(--orange))';
+    btn.textContent = label;
+    btn.onclick = () => brushZone(i);
+    btn.id = 'brushZone' + i;
+    c.appendChild(btn);
+  });
+}
+createBrushZones();
+
+function startBrushGame() {
+  if (brushStarted || brushGameDone) return;
+  brushStarted = true;
+  brushTimeLeft = 30;
+  brushZones = [false,false,false,false,false];
+  playSound('click');
+
+  const btn = document.getElementById('brushStartBtn');
+  btn.disabled = true; btn.style.display = 'none';
+
+  const gameArea = document.getElementById('brushGameArea');
+  gameArea.classList.add('brush-cursor-active');
+
+  document.getElementById('timerCircle').classList.add('active');
+  document.getElementById('brushInstruction').textContent = INSTRUCTIONS[0];
+  updateBrushSteps();
+
+  // Enable zone buttons
+  for (let i = 0; i < 5; i++) {
+    const z = document.getElementById('brushZone'+i);
+    if(z){ z.disabled = false; z.style.background = 'linear-gradient(135deg, var(--yellow), var(--orange))'; z.textContent = ZONE_LABELS[i]; }
+  }
+
+  brushTimer = setInterval(() => {
+    brushTimeLeft--;
+    document.getElementById('timerDisplay').textContent = brushTimeLeft;
+    if (brushTimeLeft <= 10) {
+      document.getElementById('timerCircle').classList.add('warning');
+    }
+    if (brushTimeLeft <= 0) {
+      clearInterval(brushTimer);
+      endBrushGame(false);
+    }
+  }, 1000);
+}
+
+function brushZone(index) {
+  if (!brushStarted || brushZones[index] || brushGameDone) return;
+  brushZones[index] = true;
+  playSound('brush');
+
+  // Button feedback
+  const z = document.getElementById('brushZone'+index);
+  z.style.background = 'linear-gradient(135deg, var(--mint), var(--green))';
+  z.textContent = '✅ ' + ZONE_LABELS[index].replace('🦠 ', '');
+  z.disabled = true;
+
+  // Hide germ
+  const germs = document.querySelectorAll('#floatingGerms .mini-germ');
+  if (germs[index]) { germs[index].style.transition='all 0.5s'; germs[index].style.opacity='0'; germs[index].style.transform='scale(0)'; }
+
+  // Spawn foam bubbles
+  spawnFoam(index);
+
+  // Tooth bounce
+  const tooth = document.getElementById('gameTooth');
+  tooth.style.transition='transform 0.2s';
+  tooth.style.transform='translate(-50%,-50%) scale(1.08)';
+  setTimeout(()=>{ tooth.style.transform='translate(-50%,-50%) scale(1)'; }, 200);
+
+  // Next instruction
+  const next = brushZones.indexOf(false);
+  document.getElementById('brushInstruction').textContent = next >= 0 ? INSTRUCTIONS[next] : '🎉 Semua bersih!';
+
+  updateBrushSteps();
+  document.getElementById('brushProgress').style.width = (brushZones.filter(z=>z).length/5*100) + '%';
+
+  if (brushZones.every(z=>z)) { clearInterval(brushTimer); endBrushGame(true); }
+}
+
+function spawnFoam(zoneIndex) {
+  const area = document.getElementById('brushGameArea');
+  const colors = ['rgba(78,205,196,0.3)','rgba(255,255,255,0.8)','rgba(196,230,253,0.5)'];
+  for (let i = 0; i < 5; i++) {
+    const b = document.createElement('div');
+    b.className = 'foam-bubble';
+    b.style.left = (30 + Math.random()*60) + '%';
+    b.style.top = (20 + Math.random()*60) + '%';
+    b.style.width = (6 + Math.random()*10) + 'px';
+    b.style.height = b.style.width;
+    b.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), ${colors[zoneIndex % 3]})`;
+    area.appendChild(b);
+    setTimeout(() => b.remove(), 1200);
+  }
+}
+
+function updateBrushSteps() {
+  document.querySelectorAll('#brushSteps .step').forEach((step, i) => {
+    step.classList.remove('done','current');
+    if (brushZones[i]) step.classList.add('done');
+    else if (!brushZones.some((z,j) => !z && j<i)) step.classList.add('current');
+  });
+}
+
+function endBrushGame(won) {
+  brushGameDone = true;
+  document.getElementById('timerCircle').classList.remove('active');
+  document.getElementById('timerCircle').classList.remove('warning');
+  document.getElementById('brushGameArea').classList.remove('brush-cursor-active');
+
+  if (won) {
+    document.getElementById('floatingGerms').style.opacity = '0';
+    document.getElementById('cleanSparkles').style.opacity = '1';
+    document.getElementById('brushInstruction').textContent = '🎉 Semua gigi bersih! Kamu hebat!';
+    playSound('victory');
+    createConfetti();
+    showReward('🏆', 'Gigi Bersih Sempurna!', 'Kamu membersihkan semua gigi dalam 30 detik! Perisai kuman aktif! 🛡️✨');
+    earnStar(7);
+  } else {
+    const cleaned = brushZones.filter(z=>z).length;
+    document.getElementById('brushInstruction').textContent = cleaned >= 3
+      ? `✨ Bagus! ${cleaned}/5 area dibersihkan!`
+      : `💪 Coba lagi! ${cleaned}/5 area dibersihkan.`;
+    showReward(cleaned >= 3 ? '⭐' : '💪',
+      cleaned >= 3 ? 'Hampir Sempurna!' : 'Semangat!',
+      `${cleaned}/5 area dibersihkan. Ingat, semua permukaan gigi harus bersih!`);
+  }
+
+  setTimeout(() => {
+    const btn = document.getElementById('brushStartBtn');
+    btn.style.display = ''; btn.disabled = false; btn.textContent = 'Coba Lagi! 🪥';
+    brushStarted = false;
+    document.getElementById('timerDisplay').textContent = '30';
+    document.getElementById('timerCircle').classList.remove('active','warning');
+  }, 3000);
+}
+
+// ═══════════════════════════════════════
+// 🏆 REWARD OVERLAY
+// ═══════════════════════════════════════
+function showReward(emoji, title, text) {
+  document.getElementById('rewardEmoji').textContent = emoji;
+  document.getElementById('rewardTitle').textContent = title;
+  document.getElementById('rewardText').textContent = text;
+  document.getElementById('rewardOverlay').classList.add('show');
+}
+
+function closeReward() {
+  playSound('click');
+  document.getElementById('rewardOverlay').classList.remove('show');
+}
+
+// ═══════════════════════════════════════
+// 🎊 CONFETTI
+// ═══════════════════════════════════════
+function createConfetti() {
+  const colors = ['#FF6B9D','#4ECDC4','#FFE66D','#A78BFA','#FF8C42','#60A5FA','#34D399'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const conf = document.createElement('div');
+      conf.className = 'confetti';
+      conf.style.left = Math.random()*100+'vw';
+      conf.style.width = (Math.random()*12+4)+'px';
+      conf.style.height = (Math.random()*12+4)+'px';
+      conf.style.background = colors[Math.floor(Math.random()*colors.length)];
+      conf.style.borderRadius = Math.random()>0.5?'50%':'2px';
+      conf.style.animationDuration = (Math.random()*2+2)+'s';
+      document.body.appendChild(conf);
+      setTimeout(() => conf.remove(), 4500);
+    }, i*40);
+  }
+}
+
+// ═══════════════════════════════════════
+// 🧠 QUIZ
+// ═══════════════════════════════════════
+const quizData = [
+  { q:'🪥 Berapa kali gosok gigi sehari?', options:['1 kali','2 kali','3 kali','Tidak perlu'], correct:1, explain:'Benar! Pagi & malam! 🌟' },
+  { q:'⏰ Berapa lama setiap kali gosok?', options:['10 detik','30 detik','2 menit','10 menit'], correct:2, explain:'2 menit untuk semua permukaan! ✨' },
+  { q:'🦠 Apa penyebab lubang gigi?', options:['Minum air','Makan nasi','Kuman makan gula','Olahraga'], correct:2, explain:'Kuman + gula = asam merusak gigi! 🧫' },
+  { q:'👨‍⚕️ Siapa menjaga gigi tetap sehat?', options:['Guru','Dokter gigi','Tukang bangunan','Koki'], correct:1, explain:'Dokter gigi = teman gigi kita! 🏥' },
+  { q:'🍬 Makanan paling berbahaya?', options:['Sayur hijau','Buah segar','Permen manis','Nasi'], correct:2, explain:'Gula = makanan kuman! 🍭' }
+];
+
+let quizAnswered = 0, quizCorrect = 0;
+
+function renderQuiz() {
+  const c = document.getElementById('quizContainer');
+  c.innerHTML = '';
+  quizData.forEach((q, qi) => {
+    const d = document.createElement('div');
+    d.className = 'quiz-question reveal';
+    d.innerHTML = `<h3>Pertanyaan ${qi+1}: ${q.q}</h3>
+      <div class="quiz-options" id="qo${qi}">
+        ${q.options.map((o,oi) => `<button class="quiz-option" onclick="answerQuiz(${qi},${oi})" id="qopt${qi}_${oi}">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfb${qi}"></div>`;
+    c.appendChild(d);
+  });
+  c.querySelectorAll('.reveal').forEach(el => sceneObserver.observe(el));
+}
+
+function answerQuiz(qi, oi) {
+  const q = quizData[qi];
+  const fb = document.getElementById('qfb'+qi);
+  document.querySelectorAll('#qo'+qi+' .quiz-option').forEach(o => o.disabled = true);
+
+  if (oi === q.correct) {
+    document.getElementById('qopt'+qi+'_'+oi).classList.add('correct');
+    fb.className = 'quiz-feedback show correct-fb';
+    fb.textContent = '✅ ' + q.explain;
+    quizCorrect++;
+    playSound('click');
+  } else {
+    document.getElementById('qopt'+qi+'_'+oi).classList.add('wrong');
+    document.getElementById('qopt'+qi+'_'+q.correct).classList.add('correct');
+    fb.className = 'quiz-feedback show wrong-fb';
+    fb.textContent = '❌ ' + q.explain;
+    playSound('wrong');
+  }
+  quizAnswered++;
+  if (quizAnswered === quizData.length) {
+    setTimeout(() => {
+      earnStar(8);
+      if (quizCorrect >= 4) { showReward('🌟',`${quizCorrect}/5 — Juara!`,'Kamu tahu banyak soal gigi! 🦷✨'); createConfetti(); }
+      else if (quizCorrect >= 2) { showReward('👍',`${quizCorrect}/5 — Bagus!`,'Terus belajar ya! 📚'); }
+      else { showReward('💪',`${quizCorrect}/5 — Semangat!`,'Baca lagi tipsnya! 📖'); }
+    }, 800);
+  }
+}
+renderQuiz();
+
+// ═══════════════════════════════════════
+// ⌨️ KEYBOARD NAV
+// ═══════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowDown'||e.key==='j') { e.preventDefault(); scrollToScene(Math.min(currentScene+1, scenes.length-1)); }
+  else if (e.key==='ArrowUp'||e.key==='k') { e.preventDefault(); scrollToScene(Math.max(currentScene-1, 0)); }
+});
+</script>
+</body>
+</html>
