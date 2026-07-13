@@ -1,296 +1,482 @@
-// ═══════════════════════════════════════════════════════════
-// 3D TOOTH — Three.js interactive hero
-// ═══════════════════════════════════════════════════════════
+/*
+ * Riko - the HERO 3D tooth character for the kids' dental health site.
+ * Three.js r128 (loaded globally via CDN). Self-contained; mounts into #tooth3d.
+ *
+ * Requirements covered:
+ *   (1) Bulb-shaped crown  -> LatheGeometry with a smooth bell profile (no cylinder)
+ *   (2) Two anatomic roots -> TubeGeometry along CatmullRomCurve3 (slight yellow tint)
+ *   (3) Detailed face      -> big blinking eyes + eyelids, rosy cheeks, wide smile, moving brows
+ *   (4) Golden star        -> ExtrudeGeometry star shape on top
+ *   (5) Purple cape        -> cloth sim (sine-wave vertex displacement)
+ *   (6) Sparkle particles  -> 25 mixed-colour floating points
+ *   (7) Toothbrush + hand  -> tiny hand holding a small brush beside the tooth
+ *   (8) Interaction        -> mouse-follow rotation, float bob, star pulse, blink cycle
+ * Container #tooth3d, 320x320, transparent bg, IntersectionObserver-gated animation.
+ */
+(function () {
+  'use strict';
 
-(function(){
-"use strict";
-
-var container = document.getElementById('tooth3d');
-if (!container) return;
-
-// ── Scene Setup ──
-var W = container.offsetWidth || 320;
-var H = container.offsetHeight || 320;
-
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-camera.position.set(0, 0.5, 5);
-
-var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-renderer.setSize(W, H);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 0);
-container.appendChild(renderer.domElement);
-
-// ── Lights ──
-var ambLight = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambLight);
-
-var dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-dirLight.position.set(3, 5, 4);
-scene.add(dirLight);
-
-var rimLight = new THREE.DirectionalLight(0xA78BFA, 0.4);
-rimLight.position.set(-2, 3, -3);
-scene.add(rimLight);
-
-// ── Materials ──
-var toothMat = new THREE.MeshPhongMaterial({
-  color: 0xF8FAFC,
-  specular: 0xFFFFFF,
-  shininess: 80,
-  emissive: 0x1a1a2e,
-  emissiveIntensity: 0.05
-});
-
-var rootMat = new THREE.MeshPhongMaterial({
-  color: 0xFDE68A,
-  specular: 0xFFD700,
-  shininess: 40
-});
-
-var eyeWhite = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, shininess: 100 });
-var eyePupil = new THREE.MeshPhongMaterial({ color: 0x1E293B, shininess: 100 });
-var eyeHighlight = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
-var mouthMat = new THREE.MeshPhongMaterial({ color: 0xF87171, shininess: 60 });
-var capeMat = new THREE.MeshPhongMaterial({ color: 0x6366F1, side: THREE.DoubleSide, shininess: 30 });
-
-// ── Tooth Body (main) ──
-var toothGroup = new THREE.Group();
-
-// Crown - slightly tapered rounded shape
-var crownGeo = new THREE.CylinderGeometry(0.75, 0.65, 1.4, 32, 8);
-// Round the top
-var crownPositions = crownGeo.attributes.position;
-for (var i = 0; i < crownPositions.count; i++) {
-  var y = crownPositions.getY(i);
-  var ratio = (y + 0.7) / 1.4; // 0 at bottom, 1 at top
-  if (ratio > 0.7) {
-    var squeeze = 1 - (ratio - 0.7) * 0.6;
-    crownPositions.setX(i, crownPositions.getX(i) * squeeze);
-    crownPositions.setZ(i, crownPositions.getZ(i) * squeeze);
-    // Round the top
-    var topPush = Math.max(0, (ratio - 0.75) * 1.2);
-    crownPositions.setY(i, crownPositions.getY(i) + topPush * 0.3);
+  if (typeof THREE === 'undefined') {
+    console.error('[Riko] THREE.js (r128) is required before tooth3d.js');
+    return;
   }
-}
-crownGeo.computeVertexNormals();
-var crown = new THREE.Mesh(crownGeo, toothMat);
-crown.position.y = 0.3;
-toothGroup.add(crown);
 
-// ── Roots (2) ──
-var rootGeo = new THREE.CylinderGeometry(0.18, 0.08, 1.0, 12);
-var rootL = new THREE.Mesh(rootGeo, rootMat);
-rootL.position.set(-0.25, -0.7, 0);
-rootL.rotation.z = 0.15;
-toothGroup.add(rootL);
+  var container = document.getElementById('tooth3d');
+  if (!container) {
+    console.error('[Riko] #tooth3d container not found');
+    return;
+  }
 
-var rootR = new THREE.Mesh(rootGeo, rootMat);
-rootR.position.set(0.25, -0.7, 0);
-rootR.rotation.z = -0.15;
-toothGroup.add(rootR);
+  var W = 320, H = 320;
 
-// ── Eyes ──
-var eyeGeo = new THREE.SphereGeometry(0.12, 16, 16);
-var pupilGeo = new THREE.SphereGeometry(0.06, 12, 12);
-var highlightGeo = new THREE.SphereGeometry(0.03, 8, 8);
+  // ---------------------------------------------------------------------------
+  // Renderer / Scene / Camera
+  // ---------------------------------------------------------------------------
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(W, H);
+  renderer.setClearColor(0x000000, 0); // transparent background
+  if ('outputEncoding' in renderer && THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+  container.appendChild(renderer.domElement);
 
-// Left eye
-var eyeLGroup = new THREE.Group();
-var eyeLWhite = new THREE.Mesh(eyeGeo, eyeWhite);
-var eyeLPupil = new THREE.Mesh(pupilGeo, eyePupil);
-eyeLPupil.position.z = 0.08;
-var eyeLHigh = new THREE.Mesh(highlightGeo, eyeHighlight);
-eyeLHigh.position.set(0.03, 0.04, 0.11);
-eyeLGroup.add(eyeLWhite, eyeLPupil, eyeLHigh);
-eyeLGroup.position.set(-0.22, 0.45, 0.62);
-toothGroup.add(eyeLGroup);
+  var scene = new THREE.Scene();
 
-// Right eye
-var eyeRGroup = new THREE.Group();
-var eyeRWhite = new THREE.Mesh(eyeGeo, eyeWhite);
-var eyeRPupil = new THREE.Mesh(pupilGeo, eyePupil);
-eyeRPupil.position.z = 0.08;
-var eyeRHigh = new THREE.Mesh(highlightGeo, eyeHighlight);
-eyeRHigh.position.set(0.03, 0.04, 0.11);
-eyeRGroup.add(eyeRWhite, eyeRPupil, eyeRHigh);
-eyeRGroup.position.set(0.22, 0.45, 0.62);
-toothGroup.add(eyeRGroup);
+  // Frame the whole figure (star top ~+3.85, root tips ~-3.27, brush to the right).
+  // Camera looks slightly right of centre so the offstage brush balances the body.
+  var camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
+  camera.position.set(0, 0, 10.4);
+  camera.lookAt(0.4, 0, 0);
 
-// ── Smile ──
-var smileShape = new THREE.Shape();
-smileShape.moveTo(-0.2, 0);
-smileShape.quadraticCurveTo(0, -0.15, 0.2, 0);
-var smilePoints = smileShape.getPoints(20);
-var smileLineGeo = new THREE.BufferGeometry().setFromPoints(
-  smilePoints.map(function(p) { return new THREE.Vector3(p.x, p.y, 0); })
-);
-var smileLine = new THREE.Line(smileLineGeo, new THREE.LineBasicMaterial({ color: 0x94A3B8, linewidth: 2 }));
-smileLine.position.set(0, 0.2, 0.66);
-toothGroup.add(smileLine);
+  // ---------------------------------------------------------------------------
+  // Lights (soft + specular highlights for the enamel)
+  // ---------------------------------------------------------------------------
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-// ── Cheek blush ──
-var blushGeo = new THREE.SphereGeometry(0.08, 12, 12);
-var blushMat = new THREE.MeshBasicMaterial({ color: 0xFECDD3, transparent: true, opacity: 0.6 });
-var blushL = new THREE.Mesh(blushGeo, blushMat);
-blushL.position.set(-0.4, 0.28, 0.55);
-blushL.scale.set(1.2, 0.8, 0.5);
-toothGroup.add(blushL);
+  var key = new THREE.DirectionalLight(0xffffff, 0.85);
+  key.position.set(3, 6, 5);
+  scene.add(key);
 
-var blushR = new THREE.Mesh(blushGeo, blushMat);
-blushR.position.set(0.4, 0.28, 0.55);
-blushR.scale.set(1.2, 0.8, 0.5);
-toothGroup.add(blushR);
+  var rim = new THREE.DirectionalLight(0xbcd2ff, 0.35);
+  rim.position.set(-4, 2, -4);
+  scene.add(rim);
 
-// ── Cape (hero!) ──
-var capeGeo = new THREE.PlaneGeometry(1.2, 1.4, 8, 8);
-var capePositions = capeGeo.attributes.position;
-for (var i = 0; i < capePositions.count; i++) {
-  var cx = capePositions.getX(i);
-  var cy = capePositions.getY(i);
-  // Curve the cape backward
-  capePositions.setZ(i, -0.3 - Math.abs(cx) * 0.4 - Math.max(0, -cy) * 0.3);
-}
-capeGeo.computeVertexNormals();
-var cape = new THREE.Mesh(capeGeo, capeMat);
-cape.position.set(0, 0.3, -0.7);
-cape.rotation.x = 0.2;
-toothGroup.add(cape);
+  var spec = new THREE.PointLight(0xcfe0ff, 0.7, 30);
+  spec.position.set(2.5, 1.5, 4.5);
+  scene.add(spec);
 
-// ── Star on top ──
-var starShape = new THREE.Shape();
-var outerR = 0.12, innerR = 0.05, points = 5;
-for (var i = 0; i < points * 2; i++) {
-  var angle = (i * Math.PI / points) - Math.PI / 2;
-  var r = i % 2 === 0 ? outerR : innerR;
-  if (i === 0) starShape.moveTo(Math.cos(angle) * r, Math.sin(angle) * r);
-  else starShape.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
-}
-starShape.closePath();
-var starGeo = new THREE.ExtrudeGeometry(starShape, { depth: 0.03, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01 });
-var starMat = new THREE.MeshPhongMaterial({ color: 0xFDE68A, emissive: 0xF59E0B, emissiveIntensity: 0.3, shininess: 100 });
-var star = new THREE.Mesh(starGeo, starMat);
-star.position.set(0.15, 1.15, 0);
-star.rotation.z = 0.3;
-toothGroup.add(star);
+  var warm = new THREE.PointLight(0xffe6b0, 0.5, 30);
+  warm.position.set(-2, -1, 3);
+  scene.add(warm);
 
-// ── Floating particles ──
-var particles = [];
-var particleGeo = new THREE.SphereGeometry(0.04, 8, 8);
-var particleColors = [0xFF6B9D, 0x4ECDC4, 0xFDE68A, 0xA78BFA, 0x60A5FA];
-for (var i = 0; i < 20; i++) {
-  var pMat = new THREE.MeshBasicMaterial({
-    color: particleColors[i % particleColors.length],
-    transparent: true,
-    opacity: 0.6
+  // ---------------------------------------------------------------------------
+  // Materials
+  // ---------------------------------------------------------------------------
+  var enamelMat = new THREE.MeshPhongMaterial({
+    color: 0xf1f5ff,        // white with a subtle blue tint
+    specular: 0x9fb8ff,
+    shininess: 95,
+    emissive: 0x1b2a4a,
+    emissiveIntensity: 0.06
   });
-  var p = new THREE.Mesh(particleGeo, pMat);
-  p.position.set(
-    (Math.random() - 0.5) * 4,
-    (Math.random() - 0.5) * 3,
-    (Math.random() - 0.5) * 2
+
+  var rootMat = new THREE.MeshPhongMaterial({
+    color: 0xfff0c2,        // slight yellow tint
+    specular: 0xffe9a8,
+    shininess: 45
+  });
+
+  var cheekMat = new THREE.MeshPhongMaterial({
+    color: 0xff9ec2, transparent: true, opacity: 0.5, shininess: 12
+  });
+
+  var eyeWhiteMat = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0x6688cc, shininess: 70 });
+  var irisMat     = new THREE.MeshPhongMaterial({ color: 0x2f9bff, specular: 0xffffff, shininess: 80 });
+  var pupilMat    = new THREE.MeshPhongMaterial({ color: 0x10131a, shininess: 40 });
+  var shineMat    = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  var mouthMat    = new THREE.MeshPhongMaterial({ color: 0xc0395b, specular: 0xffffff, shininess: 35 });
+  var browMat     = new THREE.MeshPhongMaterial({ color: 0x9b6b3a, shininess: 20 });
+  var starMat     = new THREE.MeshPhongMaterial({
+    color: 0xffd24a, emissive: 0xffb300, emissiveIntensity: 0.45,
+    specular: 0xffffff, shininess: 110
+  });
+  var capeMat = new THREE.MeshPhongMaterial({
+    color: 0x7b3fbf, side: THREE.DoubleSide, transparent: true, opacity: 0.92,
+    specular: 0xffffff, shininess: 22
+  });
+  var skinMat  = new THREE.MeshPhongMaterial({ color: 0xffe0b2, shininess: 25 });
+  var handleMat = new THREE.MeshPhongMaterial({ color: 0x4fc3f7, shininess: 40 });
+  var headMat  = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 30 });
+  var bristleMat = new THREE.MeshPhongMaterial({ color: 0xffe082, shininess: 10 });
+
+  // ---------------------------------------------------------------------------
+  // Riko group  (vertical centre of the whole figure is ~0, so base y ~ -0.29)
+  // ---------------------------------------------------------------------------
+  var RIKO_BASE_Y = -0.29;
+  var riko = new THREE.Group();
+  riko.position.y = RIKO_BASE_Y;
+  scene.add(riko);
+
+  var HC = 2.8;   // crown height
+  var MAXR = 1.7; // crown max radius
+
+  // --- (1) Bulb-shaped crown via LatheGeometry --------------------------------
+  function crownRadius(u) {
+    // u in [0,1]; smooth bell: narrower cervix, bulge near middle, rounded top
+    var bell = (u < 0.5)
+      ? (0.55 + 0.45 * Math.sin((u / 0.5) * Math.PI * 0.5))
+      : Math.pow(Math.cos(((u - 0.5) / 0.5) * Math.PI * 0.5), 0.8);
+    var taper = Math.min(1, u / 0.06); // close the bottom to a smooth point
+    return MAXR * bell * taper;
+  }
+
+  var profile = [];
+  var STEPS = 80;
+  for (var i = 0; i <= STEPS; i++) {
+    var u = i / STEPS;
+    profile.push(new THREE.Vector2(Math.max(0.0001, crownRadius(u)), u * HC));
+  }
+  var crownGeo = new THREE.LatheGeometry(profile, 64);
+  crownGeo.computeVertexNormals();
+  var crown = new THREE.Mesh(crownGeo, enamelMat);
+  riko.add(crown);
+
+  // --- (2) Two anatomic roots via TubeGeometry on CatmullRomCurve3 ------------
+  function makeRoot(side) {
+    var s = side; // -1 left, +1 right
+    var pts = [
+      new THREE.Vector3(0.05 * s, 0.05, 0.25),
+      new THREE.Vector3(0.10 * s, -0.7, 0.18),
+      new THREE.Vector3(0.55 * s, -1.5, 0.02),
+      new THREE.Vector3(0.92 * s, -2.35, -0.10),
+      new THREE.Vector3(1.12 * s, -2.95, -0.22)
+    ];
+    var curve = new THREE.CatmullRomCurve3(pts);
+    var geo = new THREE.TubeGeometry(curve, 48, 0.32, 14, false);
+    return new THREE.Mesh(geo, rootMat);
+  }
+  riko.add(makeRoot(-1));
+  riko.add(makeRoot(1));
+
+  // ---------------------------------------------------------------------------
+  // (3) Detailed face
+  // ---------------------------------------------------------------------------
+  var face = new THREE.Group();
+  riko.add(face);
+
+  var eyeY = 0.58 * HC;
+  var eyeR = crownRadius(0.58) * 0.9;
+  var eyeX = 0.6;
+  var eyeZ = eyeR;
+
+  var blinkers = []; // for blink animation
+  var eyelids = [];  // cosmetic upper-lid creases
+
+  function makeEye(sx) {
+    var g = new THREE.Group();
+    g.position.set(sx * eyeX, eyeY, eyeZ);
+
+    var white = new THREE.Mesh(new THREE.SphereGeometry(0.42, 28, 22), eyeWhiteMat);
+    g.add(white);
+
+    var iris = new THREE.Mesh(new THREE.SphereGeometry(0.24, 22, 18), irisMat);
+    iris.position.z = 0.27;
+    g.add(iris);
+
+    var pupil = new THREE.Mesh(new THREE.SphereGeometry(0.12, 18, 14), pupilMat);
+    pupil.position.z = 0.42;
+    g.add(pupil);
+
+    // little shine highlight
+    var shine = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 10), shineMat);
+    shine.position.set(-0.07, 0.09, 0.5);
+    g.add(shine);
+
+    // upper-lid crease (cosmetic) - a thin arc that also moves with the blink
+    var lid = new THREE.Mesh(
+      new THREE.TorusGeometry(0.42, 0.045, 10, 24, Math.PI),
+      eyeWhiteMat
+    );
+    lid.position.y = 0.12;
+    lid.rotation.z = Math.PI; // lower half -> forms the lid line over the eye top
+    g.add(lid);
+
+    face.add(g);
+    blinkers.push(g);   // squash Y to blink
+    eyelids.push(lid);
+  }
+  makeEye(-1);
+  makeEye(1);
+
+  // Rosy cheeks (translucent spheres)
+  function makeCheek(sx) {
+    var cY = 1.0;
+    var cZ = crownRadius(cY / HC) * 0.85;
+    var m = new THREE.Mesh(new THREE.SphereGeometry(0.30, 20, 16), cheekMat);
+    m.position.set(sx * 0.95, cY, cZ);
+    face.add(m);
+  }
+  makeCheek(-1);
+  makeCheek(1);
+
+  // Wide smile (torus arc, lower half)
+  var mouthY = 0.55;
+  var mouthZ = crownRadius(mouthY / HC) * 0.92;
+  var smile = new THREE.Mesh(
+    new THREE.TorusGeometry(0.46, 0.085, 14, 40, Math.PI),
+    mouthMat
   );
-  p.userData = {
-    speed: 0.003 + Math.random() * 0.005,
-    offset: Math.random() * Math.PI * 2,
-    radius: 1.5 + Math.random() * 1.5
-  };
-  scene.add(p);
-  particles.push(p);
-}
+  smile.position.set(0, mouthY, mouthZ);
+  smile.rotation.z = Math.PI; // flip so the arc opens upward -> a smile
+  smile.rotation.x = -0.15;
+  face.add(smile);
 
-// ── Position tooth group ──
-toothGroup.position.y = 0.2;
-scene.add(toothGroup);
-
-// ── Mouse tracking ──
-var mouseX = 0, mouseY = 0;
-var targetRotX = 0, targetRotY = 0;
-
-document.addEventListener('mousemove', function(e) {
-  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-});
-
-// ── Animation Loop ──
-var clock = new THREE.Clock();
-var running = true;
-
-function animate() {
-  if (!running) return;
-  requestAnimationFrame(animate);
-
-  var t = clock.getElapsedTime();
-
-  // Gentle float
-  toothGroup.position.y = 0.2 + Math.sin(t * 1.5) * 0.1;
-
-  // Follow mouse (smooth)
-  targetRotY = mouseX * 0.3;
-  targetRotX = mouseY * 0.15;
-  toothGroup.rotation.y += (targetRotY - toothGroup.rotation.y) * 0.05;
-  toothGroup.rotation.x += (targetRotX - toothGroup.rotation.x) * 0.05;
-
-  // Idle rotation
-  toothGroup.rotation.y += 0.003;
-
-  // Cape wave
-  var capePos = cape.geometry.attributes.position;
-  for (var i = 0; i < capePos.count; i++) {
-    var cx = capePos.getX(i);
-    var cy = capePos.getY(i);
-    capePos.setZ(i, -0.3 - Math.abs(cx) * 0.4 - Math.max(0, -cy) * 0.3 + Math.sin(t * 3 + cx * 5) * 0.05);
+  // Eyebrows that move (CapsuleGeometry is NOT in r128 -> use cylinder fallback)
+  var brows = [];
+  function makeBrow(sx) {
+    var browGeo = (typeof THREE.CapsuleGeometry === 'function')
+      ? new THREE.CapsuleGeometry(0.06, 0.34, 4, 8)
+      : new THREE.CylinderGeometry(0.06, 0.06, 0.42, 8);
+    var b = new THREE.Mesh(browGeo, browMat);
+    b.position.set(sx * eyeX, eyeY + 0.62, eyeZ + 0.05);
+    b.rotation.z = sx * 0.18;
+    face.add(b);
+    brows.push({ mesh: b, base: sx * 0.18, side: sx });
   }
-  capePos.needsUpdate = true;
+  makeBrow(-1);
+  makeBrow(1);
 
-  // Star sparkle
-  star.rotation.z = 0.3 + Math.sin(t * 4) * 0.2;
-  star.scale.setScalar(1 + Math.sin(t * 3) * 0.1);
+  // ---------------------------------------------------------------------------
+  // (4) Golden star on top (ExtrudeGeometry from a star Shape)
+  // ---------------------------------------------------------------------------
+  function makeStarShape(outer, inner, points) {
+    var shape = new THREE.Shape();
+    for (var k = 0; k < points * 2; k++) {
+      var r = (k % 2 === 0) ? outer : inner;
+      var a = (k / (points * 2)) * Math.PI * 2 - Math.PI / 2;
+      var x = Math.cos(a) * r, y = Math.sin(a) * r;
+      if (k === 0) shape.moveTo(x, y); else shape.lineTo(x, y);
+    }
+    shape.closePath();
+    return shape;
+  }
+  var starGeo = new THREE.ExtrudeGeometry(
+    makeStarShape(0.62, 0.27, 5),
+    { depth: 0.22, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 3 }
+  );
+  starGeo.center();
+  var star = new THREE.Mesh(starGeo, starMat);
+  star.position.set(0, HC + 0.45, 0.18);
+  riko.add(star);
 
-  // Eyes blink (occasionally)
-  var blinkCycle = t % 4;
-  if (blinkCycle > 3.8) {
-    eyeLGroup.scale.y = 0.1;
-    eyeRGroup.scale.y = 0.1;
+  // ---------------------------------------------------------------------------
+  // (5) Purple cape with cloth simulation (sine-wave vertex displacement)
+  // ---------------------------------------------------------------------------
+  var capeGeo = new THREE.PlaneGeometry(3.3, 3.8, 26, 26);
+  var capeBase = capeGeo.attributes.position.array.slice(0);
+  var cape = new THREE.Mesh(capeGeo, capeMat);
+  cape.position.set(0, -0.1, -1.65);
+  riko.add(cape);
+
+  function updateCape(t) {
+    var pos = capeGeo.attributes.position;
+    for (var i = 0; i < pos.count; i++) {
+      var ix = i * 3;
+      var x = capeBase[ix], y = capeBase[ix + 1];
+      var sway = (y + 1.9) / 3.8; // 0 at bottom, 1 near top
+      var z = Math.sin(x * 1.6 + t * 2.1) * 0.26 * (0.35 + sway)
+            + Math.sin(y * 2.0 - t * 1.7) * 0.18 * (0.35 + sway);
+      pos.array[ix + 2] = z;
+      pos.array[ix] = x + Math.sin(t * 1.2 + y * 0.5) * 0.13 * sway;
+    }
+    pos.needsUpdate = true;
+    capeGeo.computeVertexNormals();
+  }
+
+  // ---------------------------------------------------------------------------
+  // (6) Sparkle particles (25, mixed colours)
+  // ---------------------------------------------------------------------------
+  var SPARK = 25;
+  var sparkPos = new Float32Array(SPARK * 3);
+  var sparkCol = new Float32Array(SPARK * 3);
+  var sparkPhase = new Float32Array(SPARK);
+  var palette = [
+    new THREE.Color(0xff8ec8), // pink
+    new THREE.Color(0xffd54a), // gold
+    new THREE.Color(0x5ec8ff), // blue
+    new THREE.Color(0xb86bff)  // purple
+  ];
+  for (var p = 0; p < SPARK; p++) {
+    var rad = 2.0 + Math.random() * 1.6;
+    var th = Math.random() * Math.PI * 2;
+    var ph = Math.acos(2 * Math.random() - 1);
+    sparkPos[p * 3]     = rad * Math.sin(ph) * Math.cos(th);
+    sparkPos[p * 3 + 1] = (Math.random() * 2 - 1) * 2.6 + 0.3;
+    sparkPos[p * 3 + 2] = rad * Math.sin(ph) * Math.sin(th) * 0.7 + 0.3;
+    var c = palette[(Math.random() * palette.length) | 0];
+    sparkCol[p * 3] = c.r; sparkCol[p * 3 + 1] = c.g; sparkCol[p * 3 + 2] = c.b;
+    sparkPhase[p] = Math.random() * Math.PI * 2;
+  }
+  var sparkGeo = new THREE.BufferGeometry();
+  sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
+  sparkGeo.setAttribute('color', new THREE.BufferAttribute(sparkCol, 3));
+  var sparkMat = new THREE.PointsMaterial({
+    size: 0.2, vertexColors: true, transparent: true, opacity: 0.95,
+    depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true
+  });
+  var sparkles = new THREE.Points(sparkGeo, sparkMat);
+  scene.add(sparkles); // world-space so it floats around the whole hero
+
+  // ---------------------------------------------------------------------------
+  // (7) Toothbrush + tiny hand
+  // ---------------------------------------------------------------------------
+  var brushGroup = new THREE.Group();
+  brushGroup.position.set(1.45, -0.05, 1.0);
+  brushGroup.rotation.z = -0.32;
+  riko.add(brushGroup);
+
+  var handle = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.35, 14), handleMat);
+  handle.rotation.z = Math.PI / 2; // lie along X
+  brushGroup.add(handle);
+
+  var brushHead = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.14, 0.20), headMat);
+  brushHead.position.set(0.82, 0, 0);
+  brushGroup.add(brushHead);
+
+  for (var b = 0; b < 5; b++) {
+    var bristle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.16, 6), bristleMat);
+    bristle.position.set(0.70 + b * 0.06, 0.13, 0);
+    brushGroup.add(bristle);
+  }
+
+  // tiny hand gripping the handle
+  var hand = new THREE.Mesh(new THREE.SphereGeometry(0.2, 18, 14), skinMat);
+  hand.position.set(-0.55, 0, 0);
+  brushGroup.add(hand);
+
+  // ---------------------------------------------------------------------------
+  // (8) Interaction: mouse-follow rotation, float bob, star pulse, blink
+  // ---------------------------------------------------------------------------
+  var targetRotY = 0, targetRotX = 0;
+  var mouseInside = false;
+  var lastMove = -10;
+
+  container.addEventListener('mousemove', function (e) {
+    var r = container.getBoundingClientRect();
+    var nx = (e.clientX - r.left) / r.width - 0.5;   // -0.5..0.5
+    var ny = (e.clientY - r.top) / r.height - 0.5;
+    targetRotY = nx * 1.1;
+    targetRotX = ny * 0.5;
+    mouseInside = true;
+    lastMove = performance.now() / 1000;
+  });
+  container.addEventListener('mouseleave', function () { mouseInside = false; });
+
+  // Blink state machine
+  var elapsed = 0;
+  var blinkPhase = 0;
+  var nextBlink = 2 + Math.random() * 3;
+
+  function updateFace(dt, t) {
+    // idle auto-sway when the mouse has been still
+    if (!mouseInside || (performance.now() / 1000 - lastMove) > 2.5) {
+      targetRotY += Math.sin(t * 0.5) * 0.004;
+      targetRotX = Math.sin(t * 0.37) * 0.12;
+    }
+
+    // blink cycle
+    if (blinkPhase === 0 && t > nextBlink) blinkPhase = 0.0001;
+    if (blinkPhase > 0) {
+      blinkPhase += dt / 0.18;
+      if (blinkPhase >= 1) { blinkPhase = 0; nextBlink = t + 2.5 + Math.random() * 3; }
+    }
+    var blink = blinkPhase > 0 ? Math.sin(blinkPhase * Math.PI) : 0;
+
+    for (var i = 0; i < blinkers.length; i++) {
+      blinkers[i].scale.y = 1 - 0.92 * blink; // eyelid closes
+      eyelids[i].scale.y = 1 + 0.5 * blink;   // lid line drops a touch
+    }
+
+    // eyebrows move (subtle raise on blink + gentle idle bob)
+    for (var j = 0; j < brows.length; j++) {
+      var br = brows[j];
+      br.mesh.rotation.z = br.base - blink * 0.25;
+      br.mesh.position.y = (eyeY + 0.62) + Math.sin(t * 2 + (br.side > 0 ? 0 : 1)) * 0.04;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Animation loop (gated by IntersectionObserver)
+  // ---------------------------------------------------------------------------
+  var clock = new THREE.Clock();
+  var running = false;
+  var rafId = null;
+
+  function animate() {
+    if (!running) return;
+    rafId = requestAnimationFrame(animate);
+
+    var dt = Math.min(clock.getDelta(), 0.05);
+    elapsed += dt;
+    var t = elapsed;
+
+    // float bob
+    riko.position.y = RIKO_BASE_Y + Math.sin(t * 1.5) * 0.13;
+
+    // smooth mouse-follow rotation
+    riko.rotation.y += (targetRotY - riko.rotation.y) * 0.06;
+    riko.rotation.x += (targetRotX - riko.rotation.x) * 0.06;
+
+    // star pulse
+    var pulse = 1 + 0.14 * Math.sin(t * 3.2);
+    star.scale.setScalar(pulse);
+    star.rotation.z += dt * 0.6;
+
+    updateFace(dt, t);
+    updateCape(t);
+
+    // sparkles: slow orbit + per-particle bob
+    sparkles.rotation.y += dt * 0.25;
+    var sp = sparkGeo.attributes.position.array;
+    for (var s = 0; s < SPARK; s++) {
+      sp[s * 3 + 1] = sparkPos[s * 3 + 1] + Math.sin(t * 1.3 + sparkPhase[s]) * 0.22;
+    }
+    sparkGeo.attributes.position.needsUpdate = true;
+
+    renderer.render(scene, camera);
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    clock.start();
+    animate();
+  }
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  // IntersectionObserver: only animate while visible (perf + battery friendly)
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) start(); else stop();
+      });
+    }, { threshold: 0.05 });
+    io.observe(container);
   } else {
-    eyeLGroup.scale.y = 1;
-    eyeRGroup.scale.y = 1;
+    start(); // fallback: always animate
   }
 
-  // Particles orbit
-  for (var i = 0; i < particles.length; i++) {
-    var pp = particles[i];
-    var ud = pp.userData;
-    pp.position.x = Math.sin(t * ud.speed * 10 + ud.offset) * ud.radius;
-    pp.position.y = Math.cos(t * ud.speed * 8 + ud.offset) * ud.radius * 0.6;
-    pp.position.z = Math.sin(t * ud.speed * 6 + ud.offset * 2) * 0.5;
-    pp.material.opacity = 0.3 + Math.sin(t * 2 + ud.offset) * 0.3;
-  }
-
+  // Render one frame immediately so it isn't blank before scrolling into view.
   renderer.render(scene, camera);
-}
 
-// ── Visibility optimization ──
-var observer = new IntersectionObserver(function(entries) {
-  running = entries[0].isIntersecting;
-  if (running) animate();
-}, { threshold: 0.1 });
-observer.observe(container);
-
-// ── Resize handler ──
-function onResize() {
-  var w = container.offsetWidth;
-  var h = container.offsetHeight;
-  if (w > 0 && h > 0) {
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  }
-}
-window.addEventListener('resize', onResize);
-
-// Start
-animate();
-
+  // Debug: expose the projected NDC bounds of the figure for framing checks.
+  try {
+    var bbox = new THREE.Box3().setFromObject(riko);
+    var mn = bbox.min.clone().project(camera);
+    var mx = bbox.max.clone().project(camera);
+    window.__frame = { minx: mn.x, maxx: mx.x, miny: mn.y, maxy: mx.y };
+  } catch (e) { window.__frame = { error: String(e) }; }
 })();

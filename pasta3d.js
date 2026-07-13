@@ -1,333 +1,340 @@
 /**
- * Pasta Ajaib - Toothpaste 3D Hero
- * Kid-friendly toothpaste tube superhero with sparkle paste, cape, magical particle effects.
- * Self-contained IIFE, Three.js r128, transparent bg, IntersectionObserver, mouse-following.
+ * Pasta Ajaib - Toothpaste Hero
+ * Kids Dental Health Website - Boss Battle Character
+ * Three.js r128 | IIFE | Transparent BG | IntersectionObserver | Mouse-following
  */
 (function () {
-  const CONTAINER_ID = 'pasta3d';
-  const W = 200, H = 200;
-  const container = document.getElementById(CONTAINER_ID);
+  "use strict";
+
+  var container = document.getElementById("pasta3d");
   if (!container) return;
-  container.style.position = 'relative';
-  container.style.width = W + 'px';
-  container.style.height = H + 'px';
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-  camera.position.set(0, 0.5, 6);
-  camera.lookAt(0, 0, 0);
+  var W = 200, H = 200;
 
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  /* ── Renderer ── */
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(W, H);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setClearColor(0x000000, 0);
   container.appendChild(renderer.domElement);
 
-  // Lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-  dir.position.set(3, 5, 4);
-  scene.add(dir);
-  const point = new THREE.PointLight(0xce93d8, 0.6, 10);
-  point.position.set(-2, 3, 2);
-  scene.add(point);
-  const magicLight = new THREE.PointLight(0xff80ab, 0.4, 8);
-  magicLight.position.set(1, 2, 2);
+  /* ── Scene & Camera ── */
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(35, W / H, 0.1, 100);
+  camera.position.set(0, 0.5, 8);
+  camera.lookAt(0, 0, 0);
+
+  /* ── Lighting ── */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+  var dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+  dirLight.position.set(3, 5, 4);
+  scene.add(dirLight);
+  var rimLight = new THREE.DirectionalLight(0xdd88ff, 0.55);
+  rimLight.position.set(-4, 2, -3);
+  scene.add(rimLight);
+  var magicLight = new THREE.PointLight(0xcc88ff, 0.4, 12);
+  magicLight.position.set(2, 3, 2);
   scene.add(magicLight);
+  scene.add((function () { var l = new THREE.PointLight(0xffffff, 0.15, 8); l.position.set(0, -3, 3); return l; })());
 
-  const hero = new THREE.Group();
-
-  // === Toothpaste tube body ===
-  const tubeGeo = new THREE.CylinderGeometry(0.45, 0.35, 2.2, 16);
-  const tubeMat = new THREE.MeshPhongMaterial({
-    color: 0xe1bee7,
-    shininess: 80,
-    specular: 0xffccff
+  /* ── Materials ── */
+  var tubeMat = new THREE.MeshPhongMaterial({
+    color: 0xdd44ff, specular: 0xffffff, shininess: 90, emissive: 0x551166, emissiveIntensity: 0.2
   });
-  const tube = new THREE.Mesh(tubeGeo, tubeMat);
-  tube.position.y = -0.1;
-  hero.add(tube);
+  var labelMat = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0xffffff, shininess: 100, emissive: 0xeeeeee, emissiveIntensity: 0.1 });
+  var stripeMat = new THREE.MeshPhongMaterial({ color: 0xffdd00, specular: 0xffffff, shininess: 110, emissive: 0xccaa00, emissiveIntensity: 0.3 });
+  var stripeMat2 = new THREE.MeshPhongMaterial({ color: 0x44bbff, specular: 0xffffff, shininess: 100, emissive: 0x2288cc, emissiveIntensity: 0.25 });
+  var capMat = new THREE.MeshPhongMaterial({ color: 0xcc33cc, specular: 0xffffff, shininess: 100, emissive: 0x661166, emissiveIntensity: 0.2 });
+  var pasteMat = new THREE.MeshPhongMaterial({ color: 0x88ddff, specular: 0xffffff, shininess: 120, emissive: 0x44aacc, emissiveIntensity: 0.25, transparent: true, opacity: 0.9 });
+  var pasteStripeMat = new THREE.MeshPhongMaterial({ color: 0xff66aa, specular: 0xffffff, shininess: 110, emissive: 0xcc3366, emissiveIntensity: 0.2, transparent: true, opacity: 0.85 });
+  var eyeWhiteMat = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0xffffff, shininess: 130 });
+  var eyePupilMat = new THREE.MeshPhongMaterial({ color: 0x111111, specular: 0xffffff, shininess: 160 });
+  var capeMat = new THREE.MeshPhongMaterial({ color: 0x7722cc, specular: 0xffffff, shininess: 50, emissive: 0x331166, emissiveIntensity: 0.25, side: THREE.DoubleSide });
 
-  // Tube stripes (decorative bands)
-  const bandColors = [0xce93d8, 0xf48fb1, 0x80cbc4, 0xf48fb1, 0xce93d8];
-  bandColors.forEach((col, i) => {
-    const bandGeo = new THREE.TorusGeometry(0.39, 0.02, 8, 16);
-    const bandMat = new THREE.MeshPhongMaterial({ color: col, shininess: 60 });
-    const band = new THREE.Mesh(bandGeo, bandMat);
-    band.position.y = -0.1 + (i - 2) * 0.35;
-    band.rotation.x = Math.PI / 2;
-    hero.add(band);
-  });
+  /* ── Hero Group ── */
+  var heroGroup = new THREE.Group();
 
-  // Tube cap (top - wider part where paste comes out)
-  const capGeo = new THREE.CylinderGeometry(0.48, 0.45, 0.25, 16);
-  const capMat = new THREE.MeshPhongMaterial({ color: 0x7b1fa2, shininess: 100 });
-  const cap = new THREE.Mesh(capGeo, capMat);
-  cap.position.y = 1.1;
-  hero.add(cap);
+  /* ── Cylindrical Tube Body ── */
+  heroGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 3.2, 20), tubeMat));
 
-  // Cap tip
-  const tipGeo = new THREE.ConeGeometry(0.15, 0.2, 12);
-  const tipMat = new THREE.MeshPhongMaterial({ color: 0x9c27b0, shininess: 80 });
-  const tip = new THREE.Mesh(tipGeo, tipMat);
-  tip.position.y = 1.3;
-  hero.add(tip);
-
-  // Tube bottom (crimped end)
-  const botGeo = new THREE.BoxGeometry(0.65, 0.15, 0.35);
-  const botMat = new THREE.MeshPhongMaterial({ color: 0x7b1fa2, shininess: 80 });
-  const bot = new THREE.Mesh(botGeo, botMat);
-  bot.position.y = -1.25;
-  hero.add(bot);
-
-  // === Sparkle paste coming out ===
-  const pasteGroup = new THREE.Group();
-  pasteGroup.position.y = 1.4;
-  hero.add(pasteGroup);
-
-  // Paste blob
-  const pasteGeo = new THREE.SphereGeometry(0.2, 12, 12);
-  const pasteMat = new THREE.MeshPhongMaterial({
-    color: 0xf3e5f5,
-    shininess: 100,
-    transparent: true,
-    opacity: 0.9
-  });
-  const pasteBlob = new THREE.Mesh(pasteGeo, pasteMat);
-  pasteBlob.scale.set(1, 0.7, 1);
-  pasteBlob.position.y = 0.15;
-  pasteGroup.add(pasteBlob);
-
-  // Sparkle particles on paste
-  const sparkles = [];
-  const sparkleColors = [0xff80ab, 0x80deea, 0xfff176, 0xb39ddb, 0x80cbc4, 0xffab91, 0xa5d6a7];
-  for (let i = 0; i < 12; i++) {
-    const sGeo = new THREE.OctahedronGeometry(0.03 + Math.random() * 0.02, 0);
-    const sMat = new THREE.MeshPhongMaterial({
-      color: sparkleColors[i % sparkleColors.length],
-      emissive: sparkleColors[i % sparkleColors.length],
-      emissiveIntensity: 0.6,
-      shininess: 100
-    });
-    const sparkle = new THREE.Mesh(sGeo, sMat);
-    const angle = (i / 12) * Math.PI * 2;
-    const radius = 0.15 + Math.random() * 0.15;
-    sparkle.position.set(
-      Math.cos(angle) * radius,
-      0.15 + Math.random() * 0.2,
-      Math.sin(angle) * radius
-    );
-    sparkle.userData = { angle: angle, radius: radius, speed: 1 + Math.random() * 2 };
-    pasteGroup.add(sparkle);
-    sparkles.push(sparkle);
+  // Cap
+  var cap = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.35, 0.4, 12), capMat);
+  cap.position.y = 1.8;
+  heroGroup.add(cap);
+  for (var cri = 0; cri < 16; cri++) {
+    var ca = (cri / 16) * Math.PI * 2;
+    var ridge = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.35, 0.06), new THREE.MeshPhongMaterial({ color: 0xbb22bb, specular: 0xffffff, shininess: 60 }));
+    ridge.position.set(Math.cos(ca) * 0.33, 1.8, Math.sin(ca) * 0.33);
+    ridge.rotation.y = -ca;
+    heroGroup.add(ridge);
   }
 
-  // === Face ===
-  // Eyes (magical/star-like)
-  [-1, 1].forEach(side => {
-    const eyeWhiteGeo = new THREE.SphereGeometry(0.11, 12, 12);
-    const eyeWhiteMat = new THREE.MeshPhongMaterial({ color: 0xffffff });
-    const eyeWhite = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
-    eyeWhite.position.set(side * 0.17, 0.4, 0.38);
-    hero.add(eyeWhite);
+  // Bottom crimp
+  var crimp = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.12, 0.2), new THREE.MeshPhongMaterial({ color: 0xaaaaaa, specular: 0xffffff, shininess: 100 }));
+  crimp.position.y = -1.65;
+  heroGroup.add(crimp);
 
-    // Iris (colorful)
-    const irisGeo = new THREE.SphereGeometry(0.065, 10, 10);
-    const irisMat = new THREE.MeshPhongMaterial({
-      color: 0x9c27b0,
-      emissive: 0x4a148c,
-      emissiveIntensity: 0.3
-    });
-    const iris = new THREE.Mesh(irisGeo, irisMat);
-    iris.position.set(side * 0.17, 0.42, 0.45);
-    hero.add(iris);
+  // Label
+  heroGroup.add((function () { var m = new THREE.Mesh(new THREE.CylinderGeometry(0.67, 0.72, 1.2, 20, 1, true), labelMat); m.position.y = -0.2; return m; })());
 
-    // Sparkle in eye
-    const sparkleEyeGeo = new THREE.SphereGeometry(0.02, 6, 6);
-    const sparkleEyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const sparkleEye = new THREE.Mesh(sparkleEyeGeo, sparkleEyeMat);
-    sparkleEye.position.set(side * 0.15, 0.44, 0.49);
-    hero.add(sparkleEye);
-  });
-
-  // Magical smile
-  const smileGeo = new THREE.TorusGeometry(0.1, 0.025, 8, 12, Math.PI);
-  const smileMat = new THREE.MeshPhongMaterial({ color: 0xf48fb1 });
-  const smile = new THREE.Mesh(smileGeo, smileMat);
-  smile.position.set(0, 0.22, 0.4);
-  smile.rotation.z = Math.PI;
-  hero.add(smile);
-
-  // Cheek blush
-  [-1, 1].forEach(side => {
-    const blushGeo = new THREE.CircleGeometry(0.06, 12);
-    const blushMat = new THREE.MeshBasicMaterial({ color: 0xf8bbd0, transparent: true, opacity: 0.6 });
-    const blush = new THREE.Mesh(blushGeo, blushMat);
-    blush.position.set(side * 0.3, 0.28, 0.4);
-    hero.add(blush);
-  });
-
-  // === Cape ===
-  const capeGeo = new THREE.PlaneGeometry(0.9, 1.3, 10, 10);
-  const capeMat = new THREE.MeshPhongMaterial({
-    color: 0xab47bc,
-    side: THREE.DoubleSide,
-    shininess: 50,
-    transparent: true,
-    opacity: 0.85
-  });
-  const cape = new THREE.Mesh(capeGeo, capeMat);
-  cape.position.set(0, 0, -0.4);
-  cape.rotation.x = 0.12;
-  hero.add(cape);
-  const capeOrigPos = capeGeo.attributes.position.array.slice();
-
-  // === Magic wand (held by arm) ===
-  [-1, 1].forEach(side => {
-    // Arm
-    const armGeo = new THREE.CylinderGeometry(0.055, 0.045, 0.55, 8);
-    const armMat = new THREE.MeshPhongMaterial({ color: 0xe1bee7 });
-    const arm = new THREE.Mesh(armGeo, armMat);
-    arm.position.set(side * 0.5, 0, 0);
-    arm.rotation.z = side * 0.7;
-    hero.add(arm);
-
-    // Hand
-    const handGeo = new THREE.SphereGeometry(0.07, 8, 8);
-    const handMat = new THREE.MeshPhongMaterial({ color: 0xf3e5f5 });
-    const hand = new THREE.Mesh(handGeo, handMat);
-    hand.position.set(side * 0.78, 0.3, 0);
-    hero.add(hand);
-  });
-
-  // === Magical floating particles around hero ===
-  const magicParticles = new THREE.Group();
-  hero.add(magicParticles);
-  const particles = [];
-  for (let i = 0; i < 20; i++) {
-    const pGeo = new THREE.OctahedronGeometry(0.025 + Math.random() * 0.02, 0);
-    const pMat = new THREE.MeshBasicMaterial({
-      color: sparkleColors[i % sparkleColors.length],
-      transparent: true,
-      opacity: 0.8
-    });
-    const p = new THREE.Mesh(pGeo, pMat);
-    p.userData = {
-      angle: (i / 20) * Math.PI * 2,
-      radius: 1 + Math.random() * 0.8,
-      yOff: (Math.random() - 0.5) * 2,
-      speed: 0.5 + Math.random() * 1.5,
-      ySpeed: 0.3 + Math.random() * 0.5
-    };
-    magicParticles.add(p);
-    particles.push(p);
+  // Label stripes
+  for (var si = 0; si < 4; si++) {
+    var sg = new THREE.CylinderGeometry(0.68 + si * 0.001, 0.73 + si * 0.001, 0.12, 20, 1, true, (si * Math.PI) / 2, Math.PI * 0.3);
+    var stripe = new THREE.Mesh(sg, si % 2 === 0 ? stripeMat : stripeMat2);
+    stripe.position.y = -0.2;
+    heroGroup.add(stripe);
   }
 
-  // Belt with magic star
-  const beltGeo = new THREE.TorusGeometry(0.4, 0.035, 8, 16);
-  const beltMat = new THREE.MeshPhongMaterial({ color: 0xffd700, shininess: 100 });
-  const belt = new THREE.Mesh(beltGeo, beltMat);
-  belt.position.y = -0.3;
-  belt.rotation.x = Math.PI / 2;
-  hero.add(belt);
+  /* ── Paste Extrusion ── */
+  var pasteGroup = new THREE.Group();
+  pasteGroup.position.y = 2.0;
+  var pasteCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.05, 0.3, 0.05),
+    new THREE.Vector3(-0.08, 0.7, -0.03), new THREE.Vector3(0.1, 1.1, 0.08),
+    new THREE.Vector3(-0.05, 1.4, -0.05), new THREE.Vector3(0.15, 1.6, 0.1),
+    new THREE.Vector3(0.0, 1.3, 0.0)
+  ]);
+  var pasteMesh = new THREE.Mesh(new THREE.TubeGeometry(pasteCurve, 20, 0.18, 10, false), pasteMat);
+  pasteGroup.add(pasteMesh);
 
-  // Star emblem
-  const starShape = new THREE.Shape();
-  for (let i = 0; i < 10; i++) {
-    const r = i % 2 === 0 ? 0.12 : 0.05;
-    const angle = (i * Math.PI) / 5 - Math.PI / 2;
-    if (i === 0) starShape.moveTo(Math.cos(angle) * r, Math.sin(angle) * r);
-    else starShape.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+  var swirlCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(-0.05, 0.5, 0.12),
+    new THREE.Vector3(0.12, 0.9, -0.05), new THREE.Vector3(-0.08, 1.2, 0.08),
+    new THREE.Vector3(0.1, 1.5, -0.03)
+  ]);
+  pasteGroup.add(new THREE.Mesh(new THREE.TubeGeometry(swirlCurve, 15, 0.07, 6, false), pasteStripeMat));
+
+  var pasteTip = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 12), pasteMat);
+  pasteTip.position.set(0, 1.5, 0);
+  pasteTip.scale.y = 0.6;
+  pasteGroup.add(pasteTip);
+  heroGroup.add(pasteGroup);
+
+  /* ── Eyes ── */
+  function makeEye(x, z) {
+    var g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), new THREE.MeshPhongMaterial({ color: 0xcc33cc, specular: 0xffffff, shininess: 80 })));
+    var white = new THREE.Mesh(new THREE.SphereGeometry(0.15, 12, 12), eyeWhiteMat);
+    white.position.z = 0.12;
+    g.add(white);
+    var pupil = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), eyePupilMat);
+    pupil.position.z = 0.22;
+    g.add(pupil);
+    var glint = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 6), new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.6 }));
+    glint.position.set(0.04, 0.05, 0.26);
+    g.add(glint);
+    g.position.set(x, 0.5, z);
+    return g;
   }
-  starShape.closePath();
-  const starGeo = new THREE.ExtrudeGeometry(starShape, { depth: 0.04, bevelEnabled: false });
-  const starMat = new THREE.MeshPhongMaterial({
-    color: 0xff80ab,
-    emissive: 0x880e4f,
-    emissiveIntensity: 0.5,
-    shininess: 100
+  var leftEye = makeEye(-0.55, 0.35);
+  var rightEye = makeEye(0.55, 0.35);
+  heroGroup.add(leftEye);
+  heroGroup.add(rightEye);
+
+  /* ── Brows & Smile ── */
+  var browMat = new THREE.MeshPhongMaterial({ color: 0x551155 });
+  var lbrow = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.05, 0.06), browMat);
+  lbrow.position.set(-0.55, 0.78, 0.4);
+  lbrow.rotation.z = -0.15;
+  heroGroup.add(lbrow);
+  var rbrow = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.05, 0.06), browMat);
+  rbrow.position.set(0.55, 0.78, 0.4);
+  rbrow.rotation.z = 0.15;
+  heroGroup.add(rbrow);
+
+  var smile = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.03, 6, 8, Math.PI), new THREE.MeshPhongMaterial({ color: 0xcc3366 }));
+  smile.position.set(0, 0.25, 0.6);
+  smile.rotation.x = Math.PI;
+  heroGroup.add(smile);
+
+  /* ── Rosy Cheeks ── */
+  var cheekMat = new THREE.MeshPhongMaterial({ color: 0xff88aa, emissive: 0xcc5577, emissiveIntensity: 0.3, transparent: true, opacity: 0.5 });
+  var lcheek = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), cheekMat);
+  lcheek.position.set(-0.6, 0.3, 0.42);
+  lcheek.scale.set(1, 0.6, 0.5);
+  heroGroup.add(lcheek);
+  var rcheek = lcheek.clone();
+  rcheek.position.set(0.6, 0.3, 0.42);
+  heroGroup.add(rcheek);
+
+  /* ── Purple Cape ── */
+  var capePts = [];
+  for (var ci = 0; ci <= 12; ci++) {
+    var t = ci / 12;
+    capePts.push(new THREE.Vector3(Math.sin(t * 0.7) * 0.5, 0.6 - t * 2.8, -0.6 + Math.sin(t * 1.8) * 0.2));
+  }
+  var cape = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(capePts), 20, 0.55, 8, false), capeMat);
+  cape.position.set(0, 0.3, -0.6);
+  cape.scale.set(1, 1, 0.22);
+  heroGroup.add(cape);
+
+  /* ── Arms ── */
+  var armMat = tubeMat.clone();
+  var handMat = new THREE.MeshPhongMaterial({ color: 0xdd55ff, specular: 0xffffff, shininess: 80 });
+  function makeArm(rz, px, py) {
+    var g = new THREE.Group();
+    g.add((function () { var m = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.45, 8), armMat); m.position.y = 0.225; return m; })());
+    var hand = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), handMat);
+    hand.position.y = 0.5;
+    g.add(hand);
+    g.position.set(px, py, 0.2);
+    g.rotation.z = rz;
+    return g;
+  }
+  var leftArm = makeArm(1.2, -0.8, 0.1);
+  heroGroup.add(leftArm);
+  var rightArm = makeArm(-0.3, 0.8, -0.1);
+  heroGroup.add(rightArm);
+
+  /* ── Legs ── */
+  var legMat = new THREE.MeshPhongMaterial({ color: 0x9933cc, specular: 0xffffff, shininess: 50 });
+  var shoeMat = new THREE.MeshPhongMaterial({ color: 0x7722aa, specular: 0xffffff, shininess: 80 });
+  var ll = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, 0.5, 8), legMat);
+  ll.position.set(-0.2, -1.9, 0);
+  heroGroup.add(ll);
+  var rl = ll.clone();
+  rl.position.set(0.2, -1.9, 0);
+  heroGroup.add(rl);
+  var ls = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.22), shoeMat);
+  ls.position.set(-0.2, -2.22, 0.05);
+  heroGroup.add(ls);
+  var rs = ls.clone();
+  rs.position.set(0.2, -2.22, 0.05);
+  heroGroup.add(rs);
+
+  /* ── Wand Star ── */
+  var wandStar = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.1, 0),
+    new THREE.MeshPhongMaterial({ color: 0xffee44, emissive: 0xccaa00, emissiveIntensity: 0.6, specular: 0xffffff, shininess: 150 })
+  );
+  wandStar.position.set(1.15, 0.2, 0.2);
+  heroGroup.add(wandStar);
+
+  heroGroup.position.set(0, -0.3, 0);
+  scene.add(heroGroup);
+
+  /* ── Magical Sparkle Particles ── */
+  var sparkCount = 40;
+  var sparkPositions = new Float32Array(sparkCount * 3);
+  var sparkData = [];
+  for (var ski = 0; ski < sparkCount; ski++) {
+    var sa = Math.random() * Math.PI * 2;
+    var sr = 1.5 + Math.random() * 2.5;
+    sparkPositions[ski * 3] = Math.cos(sa) * sr;
+    sparkPositions[ski * 3 + 1] = (Math.random() - 0.5) * 4;
+    sparkPositions[ski * 3 + 2] = Math.sin(sa) * sr;
+    sparkData.push({ angle: sa, radius: sr, speed: 0.3 + Math.random() * 1.5, ySpeed: 0.2 + Math.random() * 0.8 });
+  }
+  var sparkGeo = new THREE.BufferGeometry();
+  sparkGeo.setAttribute("position", new THREE.BufferAttribute(sparkPositions, 3));
+  var sparkMat2 = new THREE.PointsMaterial({ color: 0xeebbff, size: 0.12, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending });
+  scene.add(new THREE.Points(sparkGeo, sparkMat2));
+
+  // Glow particles
+  var glowCount = 12;
+  var glowPositions = new Float32Array(glowCount * 3);
+  var glowData = [];
+  for (var gi = 0; gi < glowCount; gi++) {
+    glowPositions[gi * 3] = (Math.random() - 0.5) * 5;
+    glowPositions[gi * 3 + 1] = (Math.random() - 0.5) * 4;
+    glowPositions[gi * 3 + 2] = (Math.random() - 0.5) * 3;
+    glowData.push({ ySpeed: 0.3 + Math.random() * 0.6, xDrift: (Math.random() - 0.5) * 0.3, phase: Math.random() * Math.PI * 2 });
+  }
+  var glowGeo = new THREE.BufferGeometry();
+  glowGeo.setAttribute("position", new THREE.BufferAttribute(glowPositions, 3));
+  var glowMat = new THREE.PointsMaterial({ color: 0xff88ff, size: 0.25, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending });
+  scene.add(new THREE.Points(glowGeo, glowMat));
+
+  /* ── Mouse ── */
+  var mouseX = 0, mouseY = 0;
+  container.addEventListener("mousemove", function (e) {
+    var rect = container.getBoundingClientRect();
+    mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
   });
-  const star = new THREE.Mesh(starGeo, starMat);
-  star.position.set(0, -0.3, 0.42);
-  hero.add(star);
+  container.addEventListener("mouseleave", function () { mouseX = 0; mouseY = 0; });
 
-  hero.position.y = 0.2;
-  scene.add(hero);
-
-  // --- Mouse tracking ---
-  let mouseX = 0, mouseY = 0;
-  container.addEventListener('mousemove', function (e) {
-    const rect = container.getBoundingClientRect();
-    mouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-    mouseY = -((e.clientY - rect.top) / rect.height - 0.5) * 2;
-  });
-  container.addEventListener('mouseleave', function () { mouseX = 0; mouseY = 0; });
-
-  // --- Animation ---
-  let visible = true;
-  let time = 0;
+  /* ── Animation ── */
+  var clock = new THREE.Clock();
+  var visible = false;
+  var animId = null;
 
   function animate() {
-    requestAnimationFrame(animate);
     if (!visible) return;
-    time += 0.016;
+    animId = requestAnimationFrame(animate);
+    var t = clock.getElapsedTime();
 
-    // Hovering
-    hero.position.y = 0.2 + Math.sin(time * 2.2) * 0.18;
+    heroGroup.rotation.y += (mouseX * 0.4 - heroGroup.rotation.y) * 0.06;
+    heroGroup.rotation.x += (mouseY * 0.2 - heroGroup.rotation.x) * 0.06;
+    heroGroup.position.y = -0.3 + Math.sin(t * 2) * 0.18;
+    heroGroup.rotation.z = Math.sin(t * 1.5) * 0.05;
 
-    // Mouse-following
-    hero.rotation.y += (mouseX * 0.55 - hero.rotation.y) * 0.05;
-    hero.rotation.x += (mouseY * 0.3 - hero.rotation.x) * 0.05;
+    tubeMat.emissiveIntensity = 0.2 + Math.sin(t * 3) * 0.1;
 
-    // Cape wave
-    const cPos = cape.geometry.attributes.position;
-    for (let i = 0; i < cPos.count; i++) {
-      const ox = capeOrigPos[i * 3];
-      const oy = capeOrigPos[i * 3 + 1];
-      cPos.setZ(i, Math.sin(time * 2.8 + ox * 5 + oy * 3) * 0.09);
+    pasteGroup.rotation.z = Math.sin(t * 4) * 0.08;
+    pasteGroup.rotation.x = Math.cos(t * 3) * 0.06;
+    pasteMesh.scale.x = 1 + Math.sin(t * 5) * 0.05;
+    pasteMesh.scale.z = 1 + Math.cos(t * 5) * 0.05;
+
+    cap.rotation.y = t * 1.5;
+    wandStar.rotation.y = t * 2;
+    wandStar.rotation.x = t * 1.5;
+    var wsc = 1 + Math.sin(t * 6) * 0.15;
+    wandStar.scale.set(wsc, wsc, wsc);
+
+    cape.rotation.y = Math.sin(t * 3) * 0.15;
+    cape.scale.x = 1 + Math.sin(t * 2.5) * 0.08;
+    leftArm.rotation.z = 1.2 + Math.sin(t * 2) * 0.2;
+    leftArm.rotation.x = Math.sin(t * 3 + 1) * 0.15;
+    rightArm.rotation.z = -0.3 + Math.sin(t * 2.5 + 0.5) * 0.15;
+
+    // Eye tracking
+    leftEye.children[2].position.x = mouseX * 0.04;
+    leftEye.children[2].position.y = mouseY * 0.04;
+    rightEye.children[2].position.x = mouseX * 0.04;
+    rightEye.children[2].position.y = mouseY * 0.04;
+
+    stripeMat.emissiveIntensity = 0.3 + Math.sin(t * 4) * 0.15;
+    stripeMat2.emissiveIntensity = 0.25 + Math.cos(t * 4) * 0.15;
+
+    // Sparkles spiral
+    var sp = sparkGeo.attributes.position.array;
+    for (var ski2 = 0; ski2 < sparkCount; ski2++) {
+      var sd = sparkData[ski2];
+      sd.angle += sd.speed * 0.02;
+      sp[ski2 * 3] = Math.cos(sd.angle) * sd.radius;
+      sp[ski2 * 3 + 1] += sd.ySpeed * 0.012;
+      sp[ski2 * 3 + 2] = Math.sin(sd.angle) * sd.radius;
+      if (sp[ski2 * 3 + 1] > 3.5) { sp[ski2 * 3 + 1] = -3.5; sd.angle = Math.random() * Math.PI * 2; sd.radius = 1.5 + Math.random() * 2.5; }
     }
-    cPos.needsUpdate = true;
+    sparkGeo.attributes.position.needsUpdate = true;
+    sparkMat2.opacity = 0.4 + Math.sin(t * 3) * 0.35;
 
-    // Sparkle particles orbit on paste
-    sparkles.forEach((s) => {
-      const d = s.userData;
-      d.angle += 0.03 * d.speed;
-      s.position.x = Math.cos(d.angle) * d.radius;
-      s.position.z = Math.sin(d.angle) * d.radius;
-      s.position.y = 0.15 + Math.sin(time * d.speed + d.angle) * 0.15;
-      s.rotation.x += 0.05;
-      s.rotation.y += 0.08;
-    });
-
-    // Paste blob pulse
-    pasteBlob.scale.x = 1 + Math.sin(time * 3) * 0.08;
-    pasteBlob.scale.z = 1 + Math.cos(time * 3) * 0.08;
-
-    // Magic particles float around hero
-    particles.forEach((p) => {
-      const d = p.userData;
-      d.angle += 0.01 * d.speed;
-      p.position.x = Math.cos(d.angle) * d.radius;
-      p.position.z = Math.sin(d.angle) * d.radius;
-      p.position.y = d.yOff + Math.sin(time * d.ySpeed) * 0.3;
-      p.rotation.x += 0.03;
-      p.rotation.y += 0.05;
-      p.material.opacity = 0.5 + Math.sin(time * 2 + d.angle) * 0.3;
-    });
-
-    // Star glow
-    star.material.emissiveIntensity = 0.4 + Math.sin(time * 3) * 0.3;
-
-    // Magic light pulse
-    magicLight.intensity = 0.3 + Math.sin(time * 2) * 0.2;
+    // Glows drift
+    var gp = glowGeo.attributes.position.array;
+    for (var gi2 = 0; gi2 < glowCount; gi2++) {
+      var gd = glowData[gi2];
+      gp[gi2 * 3 + 1] += gd.ySpeed * 0.008;
+      gp[gi2 * 3] += Math.sin(t * 2 + gd.phase) * gd.xDrift * 0.01;
+      if (gp[gi2 * 3 + 1] > 3) gp[gi2 * 3 + 1] = -3;
+    }
+    glowGeo.attributes.position.needsUpdate = true;
+    glowMat.opacity = 0.3 + Math.sin(t * 2) * 0.2;
+    magicLight.intensity = 0.3 + Math.sin(t * 4) * 0.15;
 
     renderer.render(scene, camera);
   }
 
-  const obs = new IntersectionObserver(function (entries) {
-    visible = entries[0].isIntersecting;
+  /* ── IntersectionObserver ── */
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        if (!visible) { visible = true; clock.start(); animate(); }
+      } else {
+        visible = false;
+        if (animId) cancelAnimationFrame(animId);
+      }
+    });
   }, { threshold: 0.1 });
-  obs.observe(container);
-
-  animate();
+  observer.observe(container);
 })();
