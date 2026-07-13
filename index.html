@@ -2,10 +2,13 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦷 Petualangan Gigi Sehat v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Nunito:wght@400;600;700;800&display=swap">
+<title>🦷 Petualangan Gigi Sehat v4</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Nunito:wght@400;600;700;800&display=swap');
+/* Fonts loaded via link tag in head */
 
 :root {
   --pink: #FF6B9D; --mint: #4ECDC4; --yellow: #FFE66D;
@@ -680,8 +683,8 @@ body {
 <div class="particles" id="particles"></div>
 
 <!-- ═══════ SOUND TOGGLE ═══════ -->
-<button   <button class="badge-toggle" onclick="openBadges()">🏆 <span id="badgeCount">0</span></button>
-  class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Toggle Suara">🔊</button>
+<button class="badge-toggle" onclick="openBadges()">🏆 <span id="badgeCount">0</span></button>
+<button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Toggle Suara">🔊</button>
 
 <!-- ═══════ STAR RATING BAR ═══════ -->
 <div class="stars-bar" id="starsBar">
@@ -1287,156 +1290,6 @@ const INSTRUCTIONS = [
 let brushZones = [false,false,false,false,false];
 let brushTimer = null;
 let brushTimeLeft = 30;
-let brushStarted = false;
-let brushGameDone = false;
-
-function createBrushZones() {
-  const c = document.getElementById('brushZones');
-  c.style.display = 'flex';
-  ZONE_LABELS.forEach((label, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'brush-btn';
-    btn.style.fontSize = '0.95rem';
-    btn.style.padding = '0.5rem 0.9rem';
-    btn.style.background = 'linear-gradient(135deg, var(--yellow), var(--orange))';
-    btn.textContent = label;
-    btn.onclick = () => brushZone(i);
-    btn.id = 'brushZone' + i;
-    c.appendChild(btn);
-  });
-}
-createBrushZones();
-
-function startBrushGame() {
-  if (brushStarted || brushGameDone) return;
-  brushStarted = true;
-  brushTimeLeft = 30;
-  brushZones = [false,false,false,false,false];
-  playSound('click');
-
-  const btn = document.getElementById('brushStartBtn');
-  btn.disabled = true; btn.style.display = 'none';
-
-  const gameArea = document.getElementById('brushGameArea');
-  gameArea.classList.add('brush-cursor-active');
-
-  document.getElementById('timerCircle').classList.add('active');
-  document.getElementById('brushInstruction').textContent = INSTRUCTIONS[0];
-  updateBrushSteps();
-
-  // Enable zone buttons
-  for (let i = 0; i < 5; i++) {
-    const z = document.getElementById('brushZone'+i);
-    if(z){ z.disabled = false; z.style.background = 'linear-gradient(135deg, var(--yellow), var(--orange))'; z.textContent = ZONE_LABELS[i]; }
-  }
-
-  brushTimer = setInterval(() => {
-    brushTimeLeft--;
-    document.getElementById('timerDisplay').textContent = brushTimeLeft;
-    if (brushTimeLeft <= 10) {
-      document.getElementById('timerCircle').classList.add('warning');
-    }
-    if (brushTimeLeft <= 0) {
-      clearInterval(brushTimer);
-      endBrushGame(false);
-    }
-  }, 1000);
-}
-
-function brushZone(index) {
-  if (!brushStarted || brushZones[index] || brushGameDone) return;
-  brushZones[index] = true;
-  playSound('brush');
-
-  // Button feedback
-  const z = document.getElementById('brushZone'+index);
-  z.style.background = 'linear-gradient(135deg, var(--mint), var(--green))';
-  z.textContent = '✅ ' + ZONE_LABELS[index].replace('🦠 ', '');
-  z.disabled = true;
-
-  // Hide germ
-  const germs = document.querySelectorAll('#floatingGerms .mini-germ');
-  if (germs[index]) { germs[index].style.transition='all 0.5s'; germs[index].style.opacity='0'; germs[index].style.transform='scale(0)'; }
-
-  // Spawn foam bubbles
-  spawnFoam(index);
-
-  // Tooth bounce
-  const tooth = document.getElementById('gameTooth');
-  tooth.style.transition='transform 0.2s';
-  tooth.style.transform='translate(-50%,-50%) scale(1.08)';
-  setTimeout(()=>{ tooth.style.transform='translate(-50%,-50%) scale(1)'; }, 200);
-
-  // Next instruction
-  const next = brushZones.indexOf(false);
-  document.getElementById('brushInstruction').textContent = next >= 0 ? INSTRUCTIONS[next] : '🎉 Semua bersih!';
-
-  updateBrushSteps();
-  document.getElementById('brushProgress').style.width = (brushZones.filter(z=>z).length/5*100) + '%';
-
-  if (brushZones.every(z=>z)) { clearInterval(brushTimer); endBrushGame(true); }
-}
-
-function spawnFoam(zoneIndex) {
-  const area = document.getElementById('brushGameArea');
-  const colors = ['rgba(78,205,196,0.3)','rgba(255,255,255,0.8)','rgba(196,230,253,0.5)'];
-  for (let i = 0; i < 5; i++) {
-    const b = document.createElement('div');
-    b.className = 'foam-bubble';
-    b.style.left = (30 + Math.random()*60) + '%';
-    b.style.top = (20 + Math.random()*60) + '%';
-    b.style.width = (6 + Math.random()*10) + 'px';
-    b.style.height = b.style.width;
-    b.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), ${colors[zoneIndex % 3]})`;
-    area.appendChild(b);
-    setTimeout(() => b.remove(), 1200);
-  }
-}
-
-function updateBrushSteps() {
-  document.querySelectorAll('#brushSteps .step').forEach((step, i) => {
-    step.classList.remove('done','current');
-    if (brushZones[i]) step.classList.add('done');
-    else if (!brushZones.some((z,j) => !z && j<i)) step.classList.add('current');
-  });
-}
-
-function endBrushGame(won) {
-  brushGameDone = true;
-  document.getElementById('timerCircle').classList.remove('active');
-  document.getElementById('timerCircle').classList.remove('warning');
-  document.getElementById('brushGameArea').classList.remove('brush-cursor-active');
-
-  if (won) {
-    document.getElementById('floatingGerms').style.opacity = '0';
-    document.getElementById('cleanSparkles').style.opacity = '1';
-    document.getElementById('brushInstruction').textContent = '🎉 Semua gigi bersih! Kamu hebat!';
-    playSound('victory');
-    createConfetti();
-    showReward('🏆', 'Gigi Bersih Sempurna!', 'Kamu membersihkan semua gigi dalam 30 detik! Perisai kuman aktif! 🛡️✨');
-    earnStar(7);
-  } else {
-    const cleaned = brushZones.filter(z=>z).length;
-    document.getElementById('brushInstruction').textContent = cleaned >= 3
-      ? `✨ Bagus! ${cleaned}/5 area dibersihkan!`
-      : `💪 Coba lagi! ${cleaned}/5 area dibersihkan.`;
-    showReward(cleaned >= 3 ? '⭐' : '💪',
-      cleaned >= 3 ? 'Hampir Sempurna!' : 'Semangat!',
-      `${cleaned}/5 area dibersihkan. Ingat, semua permukaan gigi harus bersih!`);
-  }
-
-  setTimeout(() => {
-    const btn = document.getElementById('brushStartBtn');
-    btn.style.display = ''; btn.disabled = false; btn.textContent = 'Coba Lagi! 🪥';
-    brushStarted = false;
-    document.getElementById('timerDisplay').textContent = '30';
-    document.getElementById('timerCircle').classList.remove('active','warning');
-  }, 3000);
-}
-
-// ═══════════════════════════════════════
-// 🏆 REWARD OVERLAY
-// ═══════════════════════════════════════
 function showReward(emoji, title, text) {
   document.getElementById('rewardEmoji').textContent = emoji;
   document.getElementById('rewardTitle').textContent = title;
