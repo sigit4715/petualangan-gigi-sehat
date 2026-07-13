@@ -249,6 +249,23 @@ function endFoodGame() {
 // ── FLOSSING GAME ──
 var FL = { active: false, done: false, time: 0, timer: null, current: 0, teeth: 12, flossed: [], started: false };
 
+function updateFlossUI() {
+  var scoreEl = document.getElementById('flossScore');
+  var timerEl = document.getElementById('flossTimer');
+  if (scoreEl) {
+    if (FL.done) {
+      scoreEl.textContent = '🎉 Selesai! Waktu: ' + FL.time.toFixed(1) + 's — Hebat! 🌟';
+    } else if (FL.active) {
+      scoreEl.textContent = 'Gigi ' + (FL.current + 1) + '/' + FL.teeth + ' — Klik berurutan! 🧵';
+    } else {
+      scoreEl.textContent = 'Klik gigi secara berurutan dari kiri ke kanan!';
+    }
+  }
+  if (timerEl && FL.active) {
+    timerEl.textContent = FL.time.toFixed(1) + 's';
+  }
+}
+
 function initFlossGame() {
   FL.teeth = 12; FL.current = 0; FL.flossed = []; FL.active = false; FL.done = false; FL.time = 0;
   var wrap = document.getElementById('flossWrap');
