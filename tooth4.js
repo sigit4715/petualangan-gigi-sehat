@@ -6,19 +6,21 @@
 "use strict";
 
 // ── XP & LEVEL ──
-var xp = parseInt(localStorage.getItem('dentalXP') || '0');
-var level = Math.floor(xp / 200) + 1;
+var xp = Math.max(0, parseInt(localStorage.getItem('dentalXP')) || 0);
+var level = Math.max(1, parseInt(localStorage.getItem('dentalLevel')) || Math.floor(xp / 200) + 1);
 
 function addXP(amount, reason) {
-  xp += amount;
+  if (typeof amount !== 'number' || isNaN(amount)) return;
+  xp += Math.max(0, amount);
   if (xp > 10000) xp = 10000;
   localStorage.setItem('dentalXP', String(xp));
   var newLevel = Math.floor(xp / 200) + 1;
-  updateXPUI();
   if (newLevel > level) {
     level = newLevel;
+    localStorage.setItem('dentalLevel', String(level));
     showLevelUp(level);
   }
+  updateXPUI();
   // floating +XP indicator
   var el = document.createElement('div');
   el.textContent = '+' + amount + ' XP';
@@ -32,9 +34,13 @@ function updateXPUI() {
   var txt = document.getElementById('xpText');
   var lvl = document.getElementById('xpLevel');
   if (!fill) return;
-  var inLevel = xp % 200;
-  fill.style.width = (inLevel / 200 * 100) + '%';
-  if (txt) txt.textContent = xp + ' / ' + (level * 200);
+  var needed = level * 200;
+  var prevNeeded = (level - 1) * 200;
+  var progress = xp - prevNeeded;
+  var range = needed - prevNeeded;
+  var pct = Math.min(100, Math.max(0, (progress / range) * 100));
+  fill.style.width = pct + '%';
+  if (txt) txt.textContent = xp + ' / ' + needed;
   if (lvl) lvl.textContent = 'Lv.' + level;
 }
 
@@ -47,6 +53,20 @@ function showLevelUp(lv) {
   if (ov) ov.classList.add('show');
   setTimeout(function(){ if (ov) ov.classList.remove('show'); }, 3000);
 }
+
+// ── RESET (Mulai Lagi) ──
+function resetProgress() {
+  xp = 0;
+  level = 1;
+  localStorage.removeItem('dentalXP');
+  localStorage.removeItem('dentalLevel');
+  localStorage.removeItem('dentalStreak');
+  localStorage.removeItem('dentalLastVisit');
+  localStorage.removeItem('dentalBadges');
+  localStorage.removeItem('dentalStars');
+  updateXPUI();
+}
+window.resetProgress = resetProgress;
 
 // ── DAILY STREAK ──
 function getStreak() {
