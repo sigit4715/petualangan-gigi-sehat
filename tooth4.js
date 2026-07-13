@@ -494,7 +494,6 @@ window.startFoodGame = startFoodGame;
 window.answerFood = answerFood;
 window.startFlossGame = startFlossGame;
 window.initFlossGame = initFlossGame;
-window.updateFlossUI = updateFlossUI;
 window.openMap = openMap;
 window.closeMap = closeMap;
 window.generateCert = generateCert;
