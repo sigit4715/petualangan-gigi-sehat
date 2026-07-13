@@ -487,16 +487,16 @@ function initV4() {
   markSceneVisited(typeof currentScene !== 'undefined' ? currentScene : 0);
 }
 
-// Expose globals
-window.addXP = addXP;
-window.toggleMusic = toggleMusic;
-window.startFoodGame = startFoodGame;
-window.answerFood = answerFood;
-window.startFlossGame = startFlossGame;
-window.initFlossGame = initFlossGame;
-window.openMap = openMap;
-window.closeMap = closeMap;
-window.generateCert = generateCert;
+// Expose globals (wrapped in try/catch for debugging)
+try { window.addXP = addXP; } catch(e) { console.error('expose addXP:', e); }
+try { window.toggleMusic = toggleMusic; } catch(e) { console.error('expose toggleMusic:', e); }
+try { window.startFoodGame = startFoodGame; } catch(e) { console.error('expose startFoodGame:', e); }
+try { window.answerFood = answerFood; } catch(e) { console.error('expose answerFood:', e); }
+try { window.startFlossGame = startFlossGame; } catch(e) { console.error('expose startFlossGame:', e); }
+try { window.initFlossGame = initFlossGame; } catch(e) { console.error('expose initFlossGame:', e); }
+try { window.openMap = openMap; } catch(e) { console.error('expose openMap:', e); }
+try { window.closeMap = closeMap; } catch(e) { console.error('expose closeMap:', e); }
+try { window.generateCert = generateCert; } catch(e) { console.error('expose generateCert:', e); }
 
 // Run init when DOM ready
 if (document.readyState === 'loading') {
