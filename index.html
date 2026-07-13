@@ -704,6 +704,41 @@ body {
   .hero-3d{width:80px;height:80px}
 }
 
+
+/* ═══ Mobile Fixes (B1-B4 + Design) ═══ */
+.giant-tooth-3d,.scene-3d-large,.scene-3d-boss,.hero-3d{width:min(320px,90vw)!important;height:auto!important}
+.giant-tooth-3d canvas,.scene-3d-large canvas,.scene-3d-boss canvas,.hero-3d canvas{width:100%!important;height:auto!important;display:block}
+#brushCanvas{max-width:92vw!important}
+
+/* B2: Boss attack buttons ≥44px */
+.hero-power{min-height:44px!important;padding:12px 16px!important;font-size:1rem!important}
+
+/* B3: Cert button ≥44px */
+.cert-input button{min-height:44px!important;padding:12px 20px!important}
+
+/* B4: Slider track thicker for touch */
+.timeline-slider::-webkit-slider-runnable-track{height:12px!important}
+.timeline-slider::-moz-range-track{height:12px!important}
+.timeline-slider{height:44px!important}
+
+/* Design: Improve contrast — darken headings */
+.scene h2{color:#1E293B!important}
+.scene h3{color:#334155!important}
+.hint-text,.timer-text{color:#475569!important;font-size:0.85rem!important}
+
+/* XP text bigger + darker */
+.xp-container{font-size:1rem!important}
+#xpText{color:#334155!important;font-weight:600!important}
+
+/* Better button contrast */
+.start-btn,.attack-btn,.hero-power{font-weight:600!important}
+
+/* Mobile: boss grid 2-column */
+@media(max-width:600px){
+  .hero-team-grid{grid-template-columns:repeat(2,1fr)!important;gap:0.75rem!important}
+  .hero-power{min-width:100%!important}
+}
+
 /* ═══ Mobile Overflow Fix ═══ */
 @media(max-width:480px){
   .scene{padding:1.25rem}
