@@ -692,6 +692,18 @@ body {
 }
 
 
+
+/* ═══ 3D Character Containers ═══ */
+.scene-3d{display:flex;justify-content:center;margin:1rem auto}
+.scene-3d-large{width:320px;height:240px}
+.scene-3d-boss{width:320px;height:320px;margin-bottom:1rem}
+.hero-3d{width:100px;height:100px;margin:0 auto .5rem}
+@media(max-width:480px){
+  .scene-3d-large{width:280px;height:200px}
+  .scene-3d-boss{width:260px;height:260px}
+  .hero-3d{width:80px;height:80px}
+}
+
 /* ═══ Mobile Overflow Fix ═══ */
 @media(max-width:480px){
   .scene{padding:1.25rem}
@@ -799,6 +811,7 @@ body {
 <section class="scene scene-germs" id="scene3" data-scene="3">
   <span class="scene-number">📖 Bab 3</span>
   <h2>🦠 Kuman Menyerang!</h2>
+  <div id="kuman3d" class="scene-3d scene-3d-large"></div>
   <div class="germs-container reveal" style="position:relative;width:280px;height:180px;margin:1rem auto;">
     <div class="tooth-main" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(1.2);z-index:1;">
       <div class="tooth-root"></div><div class="tooth-root"></div>
@@ -898,7 +911,7 @@ body {
 
   <!-- Boss -->
   <div class="boss-area reveal">
-    <div class="boss-germ" id="bossGerm">🦠</div>
+    <div class="boss-germ" id="bossGerm"><div id="cavitarus3d" class="scene-3d scene-3d-boss"></div></div>
     <div class="boss-name" id="bossName">👑 CAVITARUS — Raja Kuman</div>
     <div class="boss-hp-container">
       <div class="boss-hp-bar" id="bossHpBar" style="width:100%"></div>
@@ -909,13 +922,13 @@ body {
   <!-- Hero Cards -->
   <div class="hero-team-grid reveal" id="heroTeam">
     <div class="hero-card" data-hero="brush">
-      <div class="hero-avatar">🪥</div>
+      <div id="sikat3d" class="hero-3d"></div>
       <h3>Kapten Sikat</h3>
       <p>Kekuatan: -200 HP</p>
       <button class="hero-power" onclick="activateHero('brush')">Serang! ⚡</button>
     </div>
     <div class="hero-card" data-hero="floss">
-      <div class="hero-avatar">🧵</div>
+      <div id="benang3d" class="hero-3d"></div>
       <h3>Sersan Benang</h3>
       <p>Kekuatan: -150 HP</p>
       <button class="hero-power" onclick="activateHero('floss')">Serang! ⚡</button>
@@ -933,7 +946,7 @@ body {
       <button class="hero-power" onclick="activateHero('dentist')">Serang! ⚡</button>
     </div>
     <div class="hero-card" data-hero="paste">
-      <div class="hero-avatar">✨</div>
+      <div id="pasta3d" class="hero-3d"></div>
       <h3>Pasta Ajaib</h3>
       <p>Kekuatan: -300 HP</p>
       <button class="hero-power" onclick="activateHero('paste')">Serang! ⚡</button>
@@ -1989,5 +2002,11 @@ animate();
 
 </script>
 
+
+<script src="cavitarus3d.js"></script>
+<script src="kuman3d.js"></script>
+<script src="sikat3d.js"></script>
+<script src="benang3d.js"></script>
+<script src="pasta3d.js"></script>
 </body>
 </html>
