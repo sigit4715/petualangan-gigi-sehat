@@ -705,6 +705,49 @@ body {
 }
 
 
+
+/* ═══ Scene Transitions ═══ */
+.scene {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.scene.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.scene-divider {
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--pink), var(--mint), transparent);
+  margin: 0;
+  border-radius: 2px;
+  opacity: 0.6;
+}
+/* Reveal children staggered */
+.scene.visible .reveal {
+  animation: revealUp 0.5s ease forwards;
+}
+.scene.visible .reveal:nth-child(1) { animation-delay: 0.1s; }
+.scene.visible .reveal:nth-child(2) { animation-delay: 0.2s; }
+.scene.visible .reveal:nth-child(3) { animation-delay: 0.3s; }
+.scene.visible .reveal:nth-child(4) { animation-delay: 0.4s; }
+.scene.visible .reveal:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Nav dot active state */
+.nav-dot.active {
+  transform: scale(1.5);
+  background: var(--pink);
+  box-shadow: 0 0 8px rgba(255,107,157,0.5);
+}
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
 /* ═══ Mobile Fixes (B1-B4 + Design) ═══ */
 .giant-tooth-3d,.scene-3d-large,.scene-3d-boss,.hero-3d{width:min(320px,90vw)!important;height:auto!important}
 .giant-tooth-3d canvas,.scene-3d-large canvas,.scene-3d-boss canvas,.hero-3d canvas{width:100%!important;height:auto!important;display:block}
@@ -1259,7 +1302,9 @@ scenes.forEach((s, i) => {
 
 function scrollToScene(index) {
   const el = document.getElementById('scene' + index);
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
+  if (!el) return;
+  const y = el.getBoundingClientRect().top + window.pageYOffset - 10;
+  window.scrollTo({ top: y, behavior: 'smooth' });
 }
 
 const sceneObserver = new IntersectionObserver(entries => {
@@ -2008,6 +2053,17 @@ function animate() {
 
   renderer.render(scene, camera);
 }
+
+
+// Scene visibility observer
+var sceneObserver2 = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.scene').forEach(function(s) { sceneObserver2.observe(s); });
 
 // ── Visibility optimization ──
 var observer = new IntersectionObserver(function(entries) {
