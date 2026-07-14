@@ -40,7 +40,7 @@
     style.textContent =
       '#pwa-install-banner{' +
       'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);' +
-      'z-index:9999;display:flex;align-items:center;gap:10px;' +
+      'z-index:1500;display:flex;align-items:center;gap:10px;' +
       'max-width:90vw;padding:10px 14px;border-radius:16px;' +
       'background:#FF6B9D;color:#fff;font-family:sans-serif;font-size:14px;' +
       'box-shadow:0 6px 20px rgba(255,107,157,.45);}' +
@@ -103,7 +103,7 @@
     var style = document.createElement('style');
     style.textContent =
       '#pwa-conn-status{' +
-      'position:fixed;top:12px;right:12px;z-index:9998;' +
+      'position:fixed;top:12px;left:12px;right:auto;z-index:1500;' +
       'display:flex;align-items:center;gap:6px;' +
       'padding:6px 10px;border-radius:999px;' +
       'font-family:sans-serif;font-size:12px;font-weight:bold;' +

@@ -147,10 +147,10 @@
 
     btn = document.createElement('button');
     btn.className = 'narration-toggle';
-    btn.id = 'narrationToggle';
+    btn.id = 'narrationToggle'; btn.title = 'Narasi: aktifkan/matikan suara cerita';
     document.body.appendChild(btn);
     updateButton();
-    btn.addEventListener('click', toggleNarration);
+    var lbl = document.createElement('span'); lbl.textContent = 'Cerita'; lbl.style.cssText='font-size:.6rem;color:#334155;margin-top:2px'; btn.parentElement && btn.parentElement.appendChild(lbl); btn.addEventListener('click', toggleNarration);
   }
 
   /* ── 8. SCENE OBSERVER (registers with the existing scene nodes) ─ */
