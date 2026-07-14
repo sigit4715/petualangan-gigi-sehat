@@ -708,13 +708,11 @@ body {
 
 /* ═══ Scene Transitions ═══ */
 .scene {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.scene.visible {
   opacity: 1;
   transform: translateY(0);
+}
+.scene.animate-in {
+  animation: sceneReveal 0.6s ease forwards;
 }
 .scene-divider {
   height: 4px;
@@ -724,15 +722,16 @@ body {
   opacity: 0.6;
 }
 /* Reveal children staggered */
-.scene.visible .reveal {
+.reveal.animate-in {
   animation: revealUp 0.5s ease forwards;
 }
-.scene.visible .reveal:nth-child(1) { animation-delay: 0.1s; }
-.scene.visible .reveal:nth-child(2) { animation-delay: 0.2s; }
-.scene.visible .reveal:nth-child(3) { animation-delay: 0.3s; }
-.scene.visible .reveal:nth-child(4) { animation-delay: 0.4s; }
-.scene.visible .reveal:nth-child(5) { animation-delay: 0.5s; }
+.reveal.animate-in:nth-child(1) { animation-delay: 0.1s; }
+.reveal.animate-in:nth-child(2) { animation-delay: 0.2s; }
+.reveal.animate-in:nth-child(3) { animation-delay: 0.3s; }
+.reveal.animate-in:nth-child(4) { animation-delay: 0.4s; }
+.reveal.animate-in:nth-child(5) { animation-delay: 0.5s; }
 
+@keyframes sceneReveal { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 @keyframes revealUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -2059,7 +2058,11 @@ function animate() {
 var sceneObserver2 = new IntersectionObserver(function(entries) {
   entries.forEach(function(entry) {
     if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
+      entry.target.classList.add('animate-in');
+      // Also animate reveal children
+      entry.target.querySelectorAll('.reveal').forEach(function(r, i) {
+        setTimeout(function() { r.classList.add('animate-in'); }, i * 100);
+      });
     }
   });
 }, { threshold: 0.15 });
