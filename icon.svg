@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Petualangan Gigi Sehat">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF8F0"/>
+      <stop offset="1" stop-color="#FFE3EF"/>
+    </linearGradient>
+    <linearGradient id="tooth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFD9E8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Tooth body -->
+  <path d="M256 96
+           C188 96 150 140 150 196
+           C150 250 168 286 178 338
+           C184 370 180 392 168 416
+           C160 432 172 450 192 450
+           C210 450 222 436 230 418
+           C236 404 240 392 256 392
+           C272 392 276 404 282 418
+           C290 436 302 450 320 450
+           C340 450 352 432 344 416
+           C332 392 328 370 334 338
+           C344 286 362 250 362 196
+           C362 140 324 96 256 96 Z"
+        fill="url(#tooth)" stroke="#FF6B9D" stroke-width="14" stroke-linejoin="round"/>
+  <!-- Smile -->
+  <path d="M214 250 Q256 286 298 250" fill="none" stroke="#FF6B9D" stroke-width="12" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <circle cx="222" cy="208" r="11" fill="#FF6B9D"/>
+  <circle cx="290" cy="208" r="11" fill="#FF6B9D"/>
+  <!-- Cheek blush -->
+  <circle cx="200" cy="240" r="14" fill="#FFB3D1" opacity="0.7"/>
+  <circle cx="312" cy="240" r="14" fill="#FFB3D1" opacity="0.7"/>
+</svg>
